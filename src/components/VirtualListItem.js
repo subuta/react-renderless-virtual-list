@@ -2,13 +2,15 @@ import React from 'react'
 import _ from 'lodash'
 
 import {
-  compose
+  compose,
+  pure
 } from 'recompose'
 
 import renderProps from 'src/utils/renderProps'
 import withSize from 'src/hocs/withSize'
 
 const enhance = compose(
+  pure,
   withSize
 )
 

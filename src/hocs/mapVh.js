@@ -2,13 +2,13 @@ import {
   compose,
   lifecycle,
   withState,
-  withProps,
+  withHandlers
 } from 'recompose'
 import _ from 'lodash'
 
 export default compose(
   withState('vh', 'setVh', 0),
-  withProps(({ setVh }) => ({
+  withHandlers(({ setVh }) => ({
     listen: () => {
       const listener = _.debounce((e) => setVh(window.innerHeight), 300)
 
@@ -28,5 +28,5 @@ export default compose(
     componentWillUnmount () {
       this.unlisten && this.unlisten()
     }
-  }),
+  })
 )

@@ -3,7 +3,8 @@ import React from 'react'
 import _ from 'lodash'
 
 import {
-  compose
+  compose,
+  withPropsOnChange
 } from 'recompose'
 
 import mapVh from 'src/hocs/mapVh'
@@ -11,14 +12,30 @@ import mapVh from 'src/hocs/mapVh'
 import VirtualListItem from './VirtualListItem'
 
 const enhance = compose(
-  mapVh
+  mapVh,
+  withPropsOnChange(
+    ['renderList'],
+    (props) => {
+      const List = props.renderList || (({ children, style }) => {
+        return (
+          <div
+            className="c-virtual-list"
+            style={style}
+          >
+            {children}
+          </div>
+        )
+      })
+      return { List }
+    }
+  )
 )
 
 export default enhance((props) => {
   const {
     rows = [],
-    renderList,
     vh,
+    List,
     ...rest
   } = props
 
@@ -27,17 +44,6 @@ export default enhance((props) => {
     overflowX: 'auto',
     overflowY: 'scroll'
   } : {}
-
-  const List = renderList || (({ children }) => {
-    return (
-      <div
-        className="c-virtual-list"
-        style={style}
-      >
-        {children}
-      </div>
-    )
-  })
 
   return (
     <List
