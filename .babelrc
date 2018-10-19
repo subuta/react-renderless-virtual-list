@@ -1,0 +1,13 @@
+{
+  "presets": [
+    "poi"
+  ],
+  "plugins": [
+    "@babel/plugin-proposal-object-rest-spread",
+    "react-hot-loader/babel",
+    "lodash",
+    ["module-resolver", {
+      "root": ["./"]
+    }]
+  ]
+}

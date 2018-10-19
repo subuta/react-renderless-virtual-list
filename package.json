@@ -1,0 +1,47 @@
+{
+  "name": "react-renderless-virtual-list",
+  "version": "0.1.0",
+  "description": "Renderless Virtual List component of react.",
+  "main": "index.js",
+  "scripts": {
+    "serve": "poi docs/index.js",
+    "build": "rollup -c",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/subuta/react-renderless-virtual-list.git"
+  },
+  "author": "subuta <shunta.3110@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/subuta/react-renderless-virtual-list/issues"
+  },
+  "homepage": "https://github.com/subuta/react-renderless-virtual-list#readme",
+  "dependencies": {
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-plugin-lodash": "^3.3.4",
+    "babel-plugin-module-resolver": "^3.1.1",
+    "poi": "^10.2.10",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-hot-loader": "^4.3.11",
+    "recompose": "^0.30.0",
+    "rollup": "^0.66.0",
+    "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-commonjs": "^9.1.6",
+    "rollup-plugin-json": "^3.1.0",
+    "rollup-plugin-node-resolve": "^3.4.0",
+    "standard": "^12.0.1"
+  },
+  "peerDependencies": {
+    "react": "^16.5.2",
+    "recompose": "^0.30.0"
+  }
+}
