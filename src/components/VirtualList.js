@@ -16,7 +16,7 @@ const enhance = compose(
   withPropsOnChange(
     ['renderList'],
     (props) => {
-      const List = props.renderList || (({ children, style }) => {
+      const renderList = props.renderList || (({ children, style }) => {
         return (
           <div
             className="c-virtual-list"
@@ -26,7 +26,7 @@ const enhance = compose(
           </div>
         )
       })
-      return { List }
+      return { renderList }
     }
   )
 )
@@ -35,7 +35,7 @@ export default enhance((props) => {
   const {
     rows = [],
     vh,
-    List,
+    renderList,
     ...rest
   } = props
 
@@ -44,6 +44,8 @@ export default enhance((props) => {
     overflowX: 'auto',
     overflowY: 'scroll'
   } : {}
+
+  const List = renderList
 
   return (
     <List
