@@ -1,7 +1,9 @@
-import React from 'react'
+import VirtualList from './components/VirtualList'
 
-export default () => {
-  return (
-    <h1>lib!</h1>
-  )
+export {
+  VirtualList
+}
+
+export default {
+  VirtualList
 }
