@@ -16,9 +16,12 @@ const rows = _.times(10, (index) => {
 })
 
 export default hot(module)(() => {
-  const renderList = ({ children, style }) => {
+  const renderList = ({ children, style, setListRef }) => {
     return (
-      <ul style={style}>
+      <ul
+        ref={setListRef}
+        style={style}
+      >
         {children}
       </ul>
     )
@@ -28,13 +31,16 @@ export default hot(module)(() => {
     <VirtualList
       rows={rows}
       renderList={renderList}
+      defaultRowHeight={100}
     >
-      {({ row, index, style }) => {
+      {({ row, index, style, setSizeRef }) => {
         return (
           <li
             style={style}
           >
-            {row.text}
+            <div ref={setSizeRef}>
+              {row.text}
+            </div>
           </li>
         )
       }}
