@@ -29,10 +29,13 @@ export default hot(module)(() => {
       rows={rows}
       renderList={renderList}
     >
-      {({ row, index, ...rest }) => {
-        console.log(rest)
+      {({ row, index, style }) => {
         return (
-          <li key={index}>{row.text}</li>
+          <li
+            style={style}
+          >
+            {row.text}
+          </li>
         )
       }}
     </VirtualList>
