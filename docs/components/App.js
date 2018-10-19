@@ -16,9 +16,9 @@ const rows = _.times(10, (index) => {
 })
 
 export default hot(module)(() => {
-  const renderList = ({ children }) => {
+  const renderList = ({ children, style }) => {
     return (
-      <ul>
+      <ul style={style}>
         {children}
       </ul>
     )
