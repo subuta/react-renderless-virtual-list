@@ -89,19 +89,20 @@ const enhance = compose(
   }),
   withPropsOnChange(
     (props, nextProps) => {
+      // FIXME: merge withPropsOnChange with later one.
+      const isScrollTopChanged = props.scrollTop !== nextProps.scrollTop
       const isHeightChanged = props.height !== nextProps.height
       const isVhChanged = props.vh !== nextProps.vh
       const isHeightCacheChanged = !_.isEqual(props.heightCache, nextProps.heightCache)
-      return isHeightChanged || isVhChanged || isHeightCacheChanged
+      return isScrollTopChanged || isHeightChanged || isVhChanged || isHeightCacheChanged
     },
     (props) => {
       const {
-        rows,
         vh,
         heightCache
       } = props
 
-      const height = (props.height === '100vh' && vh > 0) ? vh : height
+      const height = (props.height === '100vh' && vh > 0) ? vh : (height || 300)
       const hasHeight = !_.isNaN(Number(height))
 
       if (!hasHeight || _.isEmpty(heightCache)) return { height }
@@ -140,18 +141,22 @@ const enhance = compose(
     ({ heightCache, rows, scrollTop, height, overScanCount }) => {
       let sum = 0
       let visibleIndex = { from: -1 }
-      let absoluteTop = 0
+
+      // Top position of rows.
+      let startOfRows = 0
+      // Bottom position of rows.
+      let endOfRows = scrollTop + height
 
       _.takeWhile(heightCache, (h, i) => {
         if (visibleIndex.from === -1 && sum + h >= scrollTop) {
           visibleIndex.from = i
           // Use current sum as start position of rows.
-          absoluteTop = sum
+          startOfRows = sum
         }
 
         sum += h
 
-        const isEnd = sum >= scrollTop + height
+        const isEnd = sum >= endOfRows
 
         if (isEnd) {
           visibleIndex.to = i
@@ -162,8 +167,7 @@ const enhance = compose(
 
       if (!visibleIndex.to) {
         return {
-          visibleIndex: {},
-          overScanIndex: {}
+          overScanIndex: { from: 0, to: rows.length - 1 }
         }
       }
 
@@ -172,13 +176,17 @@ const enhance = compose(
         to: visibleIndex.to + overScanCount <= rows.length - 1 ? visibleIndex.to + overScanCount : rows.length - 1
       }
 
-      // Minus top overScan height for correct absoluteTop.
-      absoluteTop -= _.sum(_.slice(heightCache, overScanIndex.from, visibleIndex.from))
+      // Minus top overScan height for correct startOfRows.
+      startOfRows -= _.sum(_.slice(heightCache, overScanIndex.from, visibleIndex.from))
+      endOfRows += _.sum(_.slice(heightCache, overScanIndex.to, visibleIndex.to))
 
       return {
         visibleIndex,
         overScanIndex,
-        absoluteTop
+        positions: {
+          start: startOfRows,
+          end: endOfRows
+        }
       }
     }
   ),
@@ -205,9 +213,12 @@ export default enhance((props) => {
     setListRef,
     heightCache,
     overScanIndex,
+    scrollTop,
+    height
   } = props
 
-  let absoluteTop = props.absoluteTop || 0
+  let startOfRows = _.get(props, 'positions.start', 0)
+  const endOfRows = _.get(props, 'positions.end', scrollTop + height)
 
   return (
     <div
@@ -218,6 +229,7 @@ export default enhance((props) => {
         {_.map(rows, (row, index) => {
           // No-render if index out of range.
           if (index < overScanIndex.from || index > overScanIndex.to) return null
+          if (startOfRows > endOfRows) return null
 
           const component = (
             <VirtualListItem
@@ -229,11 +241,11 @@ export default enhance((props) => {
               // For renderProps.
               render={props.render}
               children={props.children}
-              absoluteTop={absoluteTop}
+              startOfRows={startOfRows}
             />
           )
 
-          absoluteTop += heightCache[index] || defaultRowHeight
+          startOfRows += heightCache[index] || defaultRowHeight
 
           return component
         })}
