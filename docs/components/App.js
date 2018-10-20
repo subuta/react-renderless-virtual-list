@@ -8,7 +8,7 @@ import {
   VirtualList
 } from 'src'
 
-const rows = _.times(10, (index) => {
+const rows = _.times(30, (index) => {
   // Fix faker seed for getting same result.
   faker.seed(index)
   const text = faker.lorem.paragraphs()
@@ -16,12 +16,9 @@ const rows = _.times(10, (index) => {
 })
 
 export default hot(module)(() => {
-  const renderList = ({ children, style, setListRef }) => {
+  const renderList = ({ children, style }) => {
     return (
-      <ul
-        ref={setListRef}
-        style={style}
-      >
+      <ul style={style}>
         {children}
       </ul>
     )
@@ -29,15 +26,14 @@ export default hot(module)(() => {
 
   return (
     <VirtualList
+      height='100vh'
       rows={rows}
       renderList={renderList}
       defaultRowHeight={100}
     >
       {({ row, index, style, setSizeRef }) => {
         return (
-          <li
-            style={style}
-          >
+          <li style={style} className={`row-${index}`}>
             <div ref={setSizeRef}>
               {row.text}
             </div>

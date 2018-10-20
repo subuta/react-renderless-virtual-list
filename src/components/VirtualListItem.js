@@ -24,18 +24,21 @@ const enhance = compose(
 
 export default enhance((props) => {
   const {
+    defaultRowHeight,
     setSizeRef,
     row,
     index,
     size,
-    // Will be used as height before render row.
-    defaultRowHeight = 100,
+    absoluteTop,
     ...rest
   } = props
 
   const exposed = { row, index, setSizeRef }
 
   const style = size.height && size.width ? {
+    position: 'absolute',
+    top: absoluteTop,
+    left: 0,
     height: size.height,
     width: size.width
   } : { minHeight: defaultRowHeight }
