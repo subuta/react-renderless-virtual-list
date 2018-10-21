@@ -10,7 +10,6 @@ import {
   withProps
 } from 'recompose'
 
-import mapVh from 'src/hocs/mapVh'
 import mapScrollTop from 'src/hocs/mapScrollTop'
 import VirtualListItem from './VirtualListItem'
 
@@ -40,7 +39,6 @@ const defaultRenderList = (props) => {
 }
 
 const enhance = compose(
-  mapVh,
   mapScrollTop,
   withState('heightCache', 'setHeightCache', []),
   // Specify defaults
@@ -48,15 +46,12 @@ const enhance = compose(
     const {
       defaultRowHeight = 100,
       height = 300,
-      vh = 0,
       overScanCount = 3,
       renderList = defaultRenderList,
       renderListContainer = defaultRenderListContainer,
       rows,
       heightCache
     } = props
-
-    const nextHeight = (height === '100vh' && vh > 0) ? vh : height
 
     // Calculate virtual list height.
     const hasDoneHeightMeasuring = heightCache.length === rows.length
@@ -70,7 +65,7 @@ const enhance = compose(
       renderListContainer,
       defaultRowHeight,
       // parse `100px` or 100
-      height: _.isNumber(nextHeight) ? nextHeight : parseFloat(nextHeight, 10)
+      height: _.isNumber(height) ? height : parseFloat(height, 10)
     }
   }),
   withHandlers((props) => {

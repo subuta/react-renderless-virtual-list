@@ -18,27 +18,31 @@ const rows = _.times(30, (index) => {
 
 export default hot(module)(() => {
   return (
-    <Sized>
-      {({size}) => {
-        return (
-          <div style={{height: '100vh'}}>
-            <VirtualList
-              height={size.height}
-              rows={rows}
-            >
-              {({ row, index, style, setSizeRef }) => {
-                return (
-                  <div style={style} className={`row-${index}`}>
-                    <div ref={setSizeRef}>
-                      {row.text}
+    <div className="flex flex-col h-screen">
+      <header className="p-4 flex-0 border-b">Fixed header area</header>
+
+      <Sized>
+        {({size}) => {
+          return (
+            <div className="flex-1">
+              <VirtualList
+                height={size.height}
+                rows={rows}
+              >
+                {({ row, index, style, setSizeRef }) => {
+                  return (
+                    <div style={style} className={`row-${index}`}>
+                      <div ref={setSizeRef}>
+                        {row.text}
+                      </div>
                     </div>
-                  </div>
-                )
-              }}
-            </VirtualList>
-          </div>
-        )
-      }}
-    </Sized>
+                  )
+                }}
+              </VirtualList>
+            </div>
+          )
+        }}
+      </Sized>
+    </div>
   )
 })
