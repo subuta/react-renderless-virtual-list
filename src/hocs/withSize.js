@@ -49,8 +49,10 @@ export default compose(
       observe,
 
       setSizeRef: () => (_ref) => {
-        ref = _ref
-        unobserve = observe()
+        if (!ref && _ref) {
+          ref = _ref
+          unobserve = observe()
+        }
       },
 
       unobserve: () => () => {
