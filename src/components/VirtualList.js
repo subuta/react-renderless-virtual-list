@@ -12,50 +12,50 @@ import {
 } from 'recompose'
 
 import mapVh from 'src/hocs/mapVh'
-
+import mapScrollTop from 'src/hocs/mapScrollTop'
 import VirtualListItem from './VirtualListItem'
+
+const defaultRenderList = (props) => {
+  const {
+    children,
+    style
+  } = props
+
+  return (
+    <div
+      className="c-virtual-list"
+      style={style}
+    >
+      {children}
+    </div>
+  )
+}
 
 const enhance = compose(
   mapVh,
-  // Specify defaults
-  withProps(({ overScanCount = 3 }) => ({
-    overScanCount
-  })),
+  mapScrollTop,
   withState('heightCache', 'setHeightCache', []),
-  withState('scrollTop', 'setScrollTop', 0),
-  withPropsOnChange(
-    ['renderList'],
-    (props) => {
-      const List = props.renderList || ((props) => {
-        const {
-          children,
-          style
-        } = props
+  // Specify defaults
+  withProps((props) => {
+    const {
+      overScanCount = 3,
+      renderList = defaultRenderList,
+      height = 300,
+      vh = 0
+    } = props
 
-        return (
-          <div
-            className="c-virtual-list"
-            style={style}
-          >
-            {children}
-          </div>
-        )
-      })
-      return { List }
+    const nextHeight = (height === '100vh' && vh > 0) ? vh : height
+    const hasHeight = !_.isNaN(Number(nextHeight))
+
+    return {
+      overScanCount,
+      List: renderList,
+      height: hasHeight ? nextHeight : 300
     }
-  ),
-  withHandlers({
-    onScroll: ({ setScrollTop, scrollTop }) => (nextScrollTop) => {
-      if (scrollTop === nextScrollTop) return
-      setScrollTop(nextScrollTop)
-    },
   }),
   withHandlers((props) => {
     let internalHeightCache = []
-    let listen = _.noop
-    let listRef = null
 
-    const onScroll = (e) => requestAnimationFrame(() => props.onScroll(listRef.scrollTop, e))
     const setHeightCache = _.debounce(props.setHeightCache, 1000 / 60)
 
     return {
@@ -64,81 +64,15 @@ const enhance = compose(
         if (!_.isEqual(heightCache, internalHeightCache)) {
           setHeightCache(internalHeightCache)
         }
-      },
-
-      setListRef: () => (ref) => {
-        listRef = ref
-
-        if (!listRef) return
-        listen = () => {
-          listRef.addEventListener('scroll', onScroll, { passive: true })
-
-          onScroll(listRef.scrollTop)
-
-          return () => listRef.removeEventListener('scroll', onScroll)
-        }
-      },
-
-      listen: () => listen
+      }
     }
   }),
   withHandlers({
     onMeasure: ({ setInternalHeightCache }) => (index, size) => {
       setInternalHeightCache(index, size.height)
-    }
-  }),
-  withPropsOnChange(
-    (props, nextProps) => {
-      // FIXME: merge withPropsOnChange with later one.
-      const isScrollTopChanged = props.scrollTop !== nextProps.scrollTop
-      const isHeightChanged = props.height !== nextProps.height
-      const isVhChanged = props.vh !== nextProps.vh
-      const isHeightCacheChanged = !_.isEqual(props.heightCache, nextProps.heightCache)
-      return isScrollTopChanged || isHeightChanged || isVhChanged || isHeightCacheChanged
     },
-    (props) => {
-      const {
-        vh,
-        heightCache
-      } = props
 
-      const height = (props.height === '100vh' && vh > 0) ? vh : (height || 300)
-      const hasHeight = !_.isNaN(Number(height))
-
-      if (!hasHeight || _.isEmpty(heightCache)) return { height }
-
-      const totalHeight = _.sum(heightCache)
-
-      const containerStyle = hasHeight ? {
-        height,
-        width: '100vw',
-        overflowX: 'auto',
-        willChange: 'transform'
-      } : {}
-
-      const listStyle = {
-        position: 'relative',
-        minHeight: '100%',
-        width: '100%',
-        height: totalHeight
-      }
-
-      return {
-        totalHeight,
-        height,
-        containerStyle,
-        listStyle
-      }
-    }
-  ),
-  withPropsOnChange(
-    (props, nextProps) => {
-      const isScrollTopChanged = props.scrollTop !== nextProps.scrollTop
-      const isHeightChanged = props.height !== nextProps.height
-      const isHeightCacheChanged = !_.isEqual(props.heightCache, nextProps.heightCache)
-      return isScrollTopChanged || isHeightChanged || isHeightCacheChanged
-    },
-    ({ heightCache, rows, scrollTop, height, overScanCount }) => {
+    calculateIndexes: ({ heightCache, rows, scrollTop, height, overScanCount }) => () => {
       let sum = 0
       let visibleIndex = { from: -1 }
 
@@ -165,11 +99,7 @@ const enhance = compose(
         return !isEnd
       })
 
-      if (!visibleIndex.to) {
-        return {
-          overScanIndex: { from: 0, to: rows.length - 1 }
-        }
-      }
+      if (!visibleIndex.to) return {}
 
       const overScanIndex = {
         from: visibleIndex.from - overScanCount >= 0 ? visibleIndex.from - overScanCount : 0,
@@ -178,7 +108,7 @@ const enhance = compose(
 
       // Minus top overScan height for correct startOfRows.
       startOfRows -= _.sum(_.slice(heightCache, overScanIndex.from, visibleIndex.from))
-      endOfRows += _.sum(_.slice(heightCache, overScanIndex.to, visibleIndex.to))
+      endOfRows += _.sum(_.slice(heightCache, visibleIndex.to, overScanIndex.to))
 
       return {
         visibleIndex,
@@ -188,17 +118,46 @@ const enhance = compose(
           end: endOfRows
         }
       }
-    }
-  ),
-  lifecycle({
-    componentDidMount () {
-      this.unlisten = this.props.listen()
     },
 
-    componentWillUnmount () {
-      this.unlisten && this.unlisten()
+    getStyles: ({ height, heightCache }) => () => {
+      if (_.isEmpty(heightCache)) return {}
+
+      const totalHeight = _.sum(heightCache)
+
+      const containerStyle = height ? {
+        height,
+        width: '100vw',
+        overflowX: 'auto',
+        willChange: 'transform'
+      } : {}
+
+      const listStyle = {
+        position: 'relative',
+        minHeight: '100%',
+        width: '100%',
+        height: totalHeight
+      }
+
+      return {
+        totalHeight,
+        containerStyle,
+        listStyle
+      }
     }
-  })
+  }),
+  withPropsOnChange(
+    (props, nextProps) => {
+      const isScrollTopChanged = props.scrollTop !== nextProps.scrollTop
+      const isHeightChanged = props.height !== nextProps.height
+      const isVhChanged = props.vh !== nextProps.vh
+      return isScrollTopChanged || isHeightChanged || isVhChanged || !_.isEqual(props.heightCache, nextProps.heightCache)
+    },
+    ({ calculateIndexes, getStyles }) => ({
+      ...calculateIndexes(),
+      ...getStyles()
+    })
+  )
 )
 
 export default enhance((props) => {
@@ -206,13 +165,16 @@ export default enhance((props) => {
     rows = [],
     containerStyle = {},
     listStyle = {},
+    overScanIndex = {
+      from: 0,
+      to: rows.length - 1
+    },
     // Will be used as height before render row.
     defaultRowHeight = 100,
     List,
     onMeasure,
-    setListRef,
+    setScrollContainerRef,
     heightCache,
-    overScanIndex,
     scrollTop,
     height
   } = props
@@ -223,7 +185,7 @@ export default enhance((props) => {
   return (
     <div
       style={containerStyle}
-      ref={setListRef}
+      ref={setScrollContainerRef}
     >
       <List style={listStyle}>
         {_.map(rows, (row, index) => {
