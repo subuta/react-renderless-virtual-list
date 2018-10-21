@@ -33,8 +33,6 @@ export default enhance((props) => {
     ...rest
   } = props
 
-  const exposed = { row, index, setSizeRef }
-
   const style = size.height && size.width ? {
     position: 'absolute',
     top: startOfRows,
@@ -42,6 +40,8 @@ export default enhance((props) => {
     height: size.height,
     width: size.width
   } : { minHeight: defaultRowHeight }
+
+  const exposed = { row, index, setSizeRef }
 
   return React.cloneElement(renderProps(rest, exposed), {
     style: style

@@ -11,7 +11,7 @@ import ResizeObserver from 'resize-observer-polyfill'
 export default compose(
   withState('size', 'setSize', { height: 0, width: 0 }),
   withHandlers({
-    onResize: ({ size, setSize }) => (entries) => {
+    onResize: ({ size, setSize }) => (el, entries) => {
       const {contentRect} = _.first(entries)
       const { top, right, bottom, left, height, width } = contentRect
       const paddingBottom = bottom - height
@@ -34,7 +34,7 @@ export default compose(
     let ref = null
     let unobserve = _.noop
 
-    const ro = new ResizeObserver(onResize)
+    const ro = new ResizeObserver((entries) => onResize(ref, entries))
 
     const observe = () => {
       if (!ref) return

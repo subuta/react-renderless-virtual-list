@@ -13,27 +13,32 @@ const rows = _.times(30, (index) => {
   // Fix faker seed for getting same result.
   faker.seed(index)
   const text = faker.lorem.paragraphs()
-  return { text }
+  return { id: index + 1, text }
 })
 
 export default hot(module)(() => {
   return (
-    <div className="flex flex-col h-screen">
-      <header className="p-4 flex-0 border-b">Fixed header area</header>
+    <div className='flex flex-col h-screen'>
+      <header className='p-4 flex-0 border-b-2'>Fixed header area</header>
 
       <Sized>
         {({size}) => {
           return (
-            <div className="flex-1">
+            <div className='flex-1'>
               <VirtualList
                 height={size.height}
                 rows={rows}
               >
-                {({ row, index, style, setSizeRef }) => {
+                {({ row, index, setSizeRef }) => {
                   return (
-                    <div style={style} className={`row-${index}`}>
-                      <div ref={setSizeRef}>
-                        {row.text}
+                    <div className={`row-${row.id}`}>
+                      <div
+                        ref={setSizeRef}
+                        className='relative px-4 py-2 border-b'
+                      >
+                        <span className='text-red font-bold'>Row: {row.id}</span>
+
+                        <p>{row.text}</p>
                       </div>
                     </div>
                   )
