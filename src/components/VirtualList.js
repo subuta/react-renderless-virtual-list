@@ -14,19 +14,28 @@ import mapVh from 'src/hocs/mapVh'
 import mapScrollTop from 'src/hocs/mapScrollTop'
 import VirtualListItem from './VirtualListItem'
 
+const defaultRenderListContainer = (props) => {
+  const {
+    className = 'c-virtual-list-container',
+    children,
+    style,
+    setScrollContainerRef
+  } = props
+
+  return (
+    <div ref={setScrollContainerRef} className={className} style={style}>{children}</div>
+  )
+}
+
 const defaultRenderList = (props) => {
   const {
+    className = 'c-virtual-list',
     children,
     style
   } = props
 
   return (
-    <div
-      className="c-virtual-list"
-      style={style}
-    >
-      {children}
-    </div>
+    <div className={className} style={style}>{children}</div>
   )
 }
 
@@ -42,12 +51,12 @@ const enhance = compose(
       vh = 0,
       overScanCount = 3,
       renderList = defaultRenderList,
+      renderListContainer = defaultRenderListContainer,
       rows,
       heightCache
     } = props
 
     const nextHeight = (height === '100vh' && vh > 0) ? vh : height
-    const hasHeight = !_.isNaN(Number(nextHeight))
 
     // Calculate virtual list height.
     const hasDoneHeightMeasuring = heightCache.length === rows.length
@@ -58,8 +67,10 @@ const enhance = compose(
       totalHeight,
       overScanCount,
       renderList,
+      renderListContainer,
       defaultRowHeight,
-      height: hasHeight ? nextHeight : 300
+      // parse `100px` or 100
+      height: _.isNumber(nextHeight) ? nextHeight : parseFloat(nextHeight, 10)
     }
   }),
   withHandlers((props) => {
@@ -198,6 +209,14 @@ const enhance = compose(
       ...props.calculateIndexes(),
       ...props.getStyles()
     })
+  ),
+  withPropsOnChange(
+    ['renderList', 'renderListContainer', 'renderListItem'],
+    ({ renderList, renderListContainer, renderListItem }) => ({
+      renderList: _.memoize(renderList),
+      renderListContainer: _.memoize(renderListContainer),
+      renderListItem: _.memoize(renderListItem, (props) => `${props.index}-${props.startOfRows}`),
+    })
   )
 )
 
@@ -215,18 +234,20 @@ export default enhance((props) => {
     heightCache,
     renderList,
     setScrollContainerRef,
-    renderListItem
+    renderListItem,
+    renderListContainer
   } = props
 
   let startOfRows = _.get(props, 'positions.start')
   const endOfRows = _.get(props, 'positions.end')
 
   const List = renderList
+  const Container = renderListContainer
 
   return (
-    <div
+    <Container
       style={containerStyle}
-      ref={setScrollContainerRef}
+      setScrollContainerRef={setScrollContainerRef}
     >
       <List style={listStyle}>
         {_.map(rows, (row, index) => {
@@ -241,6 +262,6 @@ export default enhance((props) => {
           return component
         })}
       </List>
-    </div>
+    </Container>
   )
 })

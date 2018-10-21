@@ -5,7 +5,8 @@ import _ from 'lodash'
 import faker from 'faker'
 
 import {
-  VirtualList
+  VirtualList,
+  Sized
 } from 'src'
 
 const rows = _.times(30, (index) => {
@@ -16,30 +17,28 @@ const rows = _.times(30, (index) => {
 })
 
 export default hot(module)(() => {
-  const renderList = ({ children, style }) => {
-    return (
-      <ul style={style}>
-        {children}
-      </ul>
-    )
-  }
-
   return (
-    <VirtualList
-      height='100vh'
-      rows={rows}
-      renderList={renderList}
-      defaultRowHeight={100}
-    >
-      {({ row, index, style, setSizeRef }) => {
+    <Sized>
+      {({size}) => {
         return (
-          <li style={style} className={`row-${index}`}>
-            <div ref={setSizeRef}>
-              {row.text}
-            </div>
-          </li>
+          <div style={{height: '100vh'}}>
+            <VirtualList
+              height={size.height}
+              rows={rows}
+            >
+              {({ row, index, style, setSizeRef }) => {
+                return (
+                  <div style={style} className={`row-${index}`}>
+                    <div ref={setSizeRef}>
+                      {row.text}
+                    </div>
+                  </div>
+                )
+              }}
+            </VirtualList>
+          </div>
         )
       }}
-    </VirtualList>
+    </Sized>
   )
 })

@@ -1,9 +1,12 @@
+import Sized from './components/Sized'
 import VirtualList from './components/VirtualList'
 
 export {
-  VirtualList
+  VirtualList,
+  Sized
 }
 
 export default {
-  VirtualList
+  VirtualList,
+  Sized
 }
