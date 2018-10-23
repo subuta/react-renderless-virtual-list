@@ -24,7 +24,7 @@ export default hot(module)(() => {
       <Sized>
         {({size}) => {
           return (
-            <div className='flex-1'>
+            <div className='flex-1 overflow-hidden'>
               <VirtualList
                 height={size.height}
                 rows={rows}
