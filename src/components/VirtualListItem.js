@@ -30,12 +30,13 @@ export default enhance((props) => {
     index,
     size,
     startOfRows,
+    reversed = false,
     ...rest
   } = props
 
   const style = size.height && size.width ? {
     position: 'absolute',
-    bottom: startOfRows,
+    [reversed ? 'bottom' : 'top']: startOfRows,
     left: 0,
     height: size.height,
     width: size.width

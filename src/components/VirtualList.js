@@ -41,8 +41,8 @@ const defaultRenderList = (props) => {
 
 const enhance = compose(
   withScroll,
-  withState('heightCache', 'setHeightCache', ({ rows, defaultRowHeight = 100 }) => {
-    return _.fill(new Array(rows.length), defaultRowHeight)
+  withState('heightCache', 'setHeightCache', ({ reversed, rows, defaultRowHeight = 100 }) => {
+    return reversed ? _.fill(new Array(rows.length), defaultRowHeight) : []
   }),
   // Specify defaults
   withProps((props) => {
@@ -93,22 +93,23 @@ const enhance = compose(
         height,
         totalHeight,
         overScanCount,
-        defaultRowHeight
+        defaultRowHeight,
+        reversed
       } = props
 
       let sum = 0
       let visibleIndex = { from: -1, to: 0 }
 
       // Start position of rows.
-      let startOfRows = totalHeight - (scrollTop + height)
+      let startOfRows = reversed ? (totalHeight - (scrollTop + height)) : 0
       // End position of rows.
-      let endOfRows = startOfRows + height
+      let endOfRows = reversed ? (startOfRows + height) : scrollTop + height
 
       _.takeWhile(_.times(rows.length), (i) => {
         const h = heightCache[i]
         visibleIndex.to = i
 
-        if (visibleIndex.from === -1 && sum + h >= startOfRows) {
+        if (visibleIndex.from === -1 && sum + h >= (reversed ? startOfRows : scrollTop)) {
           visibleIndex.from = i
           // Use current sum as start position of rows.
           startOfRows = sum
@@ -182,7 +183,8 @@ const enhance = compose(
       const {
         // Will be used as height before render row.
         defaultRowHeight,
-        onMeasure
+        onMeasure,
+        reversed
       } = props
 
       return (
@@ -192,6 +194,7 @@ const enhance = compose(
           index={index}
           onMeasure={onMeasure}
           defaultRowHeight={defaultRowHeight}
+          reversed={reversed}
           // For renderProps.
           render={props.render}
           children={props.children}
