@@ -4,6 +4,7 @@ import _ from 'lodash'
 
 import {
   compose,
+  withStateHandlers,
   withHandlers,
   withPropsOnChange,
   withState,
@@ -43,6 +44,19 @@ const enhance = compose(
   withState('heightCache', 'setHeightCache', ({ reversed, rows, defaultRowHeight = 100 }) => {
     return reversed ? _.fill(new Array(rows.length), defaultRowHeight) : []
   }),
+  withStateHandlers(
+    ({ reversed, rows, defaultRowHeight = 100 }) => {
+      return {
+        heightCache: reversed ? _.fill(new Array(rows.length), defaultRowHeight) : []
+      }
+    },
+    {
+      setHeightCache: (state) => (heightCache) => {
+        if (_.isEqual(state.heightCache, heightCache)) return
+        return { heightCache }
+      }
+    }
+  ),
   // Specify defaults
   withProps((props) => {
     const {
@@ -69,14 +83,11 @@ const enhance = compose(
   }),
   withScroll,
   withHandlers((props) => {
-    let debouncedHeightCache = props.heightCache
-    const setHeightCache = _.debounce(props.setHeightCache, 1000 / 60)
+    const setHeightCache = _.debounce(props.setHeightCache, 1000 / 30)
     return {
       setDebouncedHeightCache: ({ heightCache }) => (index, height) => {
-        debouncedHeightCache[index] = height
-        if (!_.isEqual(heightCache, debouncedHeightCache)) {
-          setHeightCache(debouncedHeightCache)
-        }
+        heightCache[index] = height
+        setHeightCache(heightCache)
       }
     }
   }),
@@ -91,11 +102,13 @@ const enhance = compose(
         rows,
         scrollTop,
         height,
-        totalHeight,
         overScanCount,
         defaultRowHeight,
         reversed
       } = props
+
+      // Calculate virtual list height.
+      const totalHeight = _.sum(heightCache)
 
       let sum = 0
       let visibleIndex = { from: -1, to: 0 }
@@ -155,7 +168,10 @@ const enhance = compose(
       }
     },
 
-    getStyles: ({ totalHeight, height }) => () => {
+    getStyles: ({ heightCache, height }) => () => {
+      // Calculate virtual list height.
+      const totalHeight = _.sum(heightCache)
+
       if (totalHeight === 0) return {}
 
       const containerStyle = height ? {
