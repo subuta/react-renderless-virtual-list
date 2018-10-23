@@ -40,7 +40,6 @@ const defaultRenderList = (props) => {
 }
 
 const enhance = compose(
-  withScroll,
   withState('heightCache', 'setHeightCache', ({ reversed, rows, defaultRowHeight = 100 }) => {
     return reversed ? _.fill(new Array(rows.length), defaultRowHeight) : []
   }),
@@ -68,9 +67,10 @@ const enhance = compose(
       height: _.isNumber(height) ? height : parseFloat(height, 10)
     }
   }),
+  withScroll,
   withHandlers((props) => {
-    let debouncedHeightCache = []
-    const setHeightCache = _.debounce(props.setHeightCache, 1000 / 30)
+    let debouncedHeightCache = props.heightCache
+    const setHeightCache = _.debounce(props.setHeightCache, 1000 / 60)
     return {
       setDebouncedHeightCache: ({ heightCache }) => (index, height) => {
         debouncedHeightCache[index] = height
@@ -221,7 +221,7 @@ const enhance = compose(
   lifecycle({
     componentDidMount () {
       if (this.props.reversed) {
-        this.props.requestScrollTo(this.props.totalHeight)
+        _.delay(() => this.props.requestScrollToBottom(), 0)
       }
     }
   })

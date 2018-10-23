@@ -30,6 +30,14 @@ export default compose(
           scrollTop,
           scrollReason: SCROLL_REASON_REQUESTED
         }
+      },
+
+      requestScrollToBottom: (state, props) => () => {
+        if (state.scrollTop === props.totalHeight) return
+        return {
+          scrollTop: props.totalHeight,
+          scrollReason: SCROLL_REASON_REQUESTED
+        }
       }
     }
   ),
@@ -53,10 +61,8 @@ export default compose(
         }
       },
 
-      scrollTo: () => (scrollTop) => {
-        _.delay(() => {
-          scrollContainerRef.scrollTop = scrollTop
-        }, 0)
+      scrollTo: ({ totalHeight }) => () => {
+        scrollContainerRef.scrollTop = totalHeight
       },
 
       listen: () => listen
