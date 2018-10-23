@@ -35,7 +35,7 @@ export default enhance((props) => {
 
   const style = size.height && size.width ? {
     position: 'absolute',
-    top: startOfRows,
+    bottom: startOfRows,
     left: 0,
     height: size.height,
     width: size.width

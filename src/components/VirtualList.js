@@ -7,10 +7,11 @@ import {
   withHandlers,
   withPropsOnChange,
   withState,
-  withProps
+  withProps,
+  lifecycle
 } from 'recompose'
 
-import mapScrollTop from 'src/hocs/mapScrollTop'
+import withScroll from 'src/hocs/withScroll'
 import VirtualListItem from './VirtualListItem'
 
 const defaultRenderListContainer = (props) => {
@@ -39,8 +40,10 @@ const defaultRenderList = (props) => {
 }
 
 const enhance = compose(
-  mapScrollTop,
-  withState('heightCache', 'setHeightCache', []),
+  withScroll,
+  withState('heightCache', 'setHeightCache', ({ rows, defaultRowHeight = 100 }) => {
+    return _.fill(new Array(rows.length), defaultRowHeight)
+  }),
   // Specify defaults
   withProps((props) => {
     const {
@@ -49,14 +52,11 @@ const enhance = compose(
       overScanCount = 3,
       renderList = defaultRenderList,
       renderListContainer = defaultRenderListContainer,
-      rows,
       heightCache
     } = props
 
     // Calculate virtual list height.
-    const hasDoneHeightMeasuring = heightCache.length === rows.length
-    const estimatedHeight = rows.length * defaultRowHeight
-    const totalHeight = hasDoneHeightMeasuring ? _.sum(heightCache) : _.min([_.sum(heightCache), estimatedHeight])
+    const totalHeight = _.sum(heightCache)
 
     return {
       totalHeight,
@@ -91,6 +91,7 @@ const enhance = compose(
         rows,
         scrollTop,
         height,
+        totalHeight,
         overScanCount,
         defaultRowHeight
       } = props
@@ -98,15 +99,16 @@ const enhance = compose(
       let sum = 0
       let visibleIndex = { from: -1, to: 0 }
 
-      // Top position of rows.
-      let startOfRows = 0
-      // Bottom position of rows.
-      let endOfRows = scrollTop + height
+      // Start position of rows.
+      let startOfRows = totalHeight - (scrollTop + height)
+      // End position of rows.
+      let endOfRows = startOfRows + height
 
-      _.takeWhile(heightCache, (h, i) => {
+      _.takeWhile(_.times(rows.length), (i) => {
+        const h = heightCache[i]
         visibleIndex.to = i
 
-        if (visibleIndex.from === -1 && sum + h >= scrollTop) {
+        if (visibleIndex.from === -1 && sum + h >= startOfRows) {
           visibleIndex.from = i
           // Use current sum as start position of rows.
           startOfRows = sum
@@ -212,7 +214,14 @@ const enhance = compose(
       renderListContainer: _.memoize(renderListContainer),
       renderListItem: _.memoize(renderListItem, (props) => `${props.index}-${props.startOfRows}`),
     })
-  )
+  ),
+  lifecycle({
+    componentDidMount () {
+      if (this.props.reversed) {
+        this.props.requestScrollTo(this.props.totalHeight)
+      }
+    }
+  })
 )
 
 export default enhance((props) => {

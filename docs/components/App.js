@@ -28,6 +28,7 @@ export default hot(module)(() => {
               <VirtualList
                 height={size.height}
                 rows={rows}
+                reversed
               >
                 {({ row, index, setSizeRef }) => {
                   return (
