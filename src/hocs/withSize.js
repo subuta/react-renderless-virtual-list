@@ -31,17 +31,17 @@ export default compose(
     }
   }),
   withHandlers(({ setSize, onResize }) => {
-    let ref = null
+    let sizeRef = null
     let unobserve = _.noop
 
-    const ro = new ResizeObserver((entries) => onResize(ref, entries))
+    const ro = new ResizeObserver((entries) => onResize(sizeRef, entries))
 
     const observe = () => {
-      if (!ref) return
-      ro.observe(ref)
+      if (!sizeRef) return
+      ro.observe(sizeRef)
       return () => {
-        ro.unobserve(ref)
-        ref = null
+        ro.unobserve(sizeRef)
+        sizeRef = null
       }
     }
 
@@ -49,10 +49,10 @@ export default compose(
       observe,
 
       setSizeRef: () => (_ref) => {
-        if (!ref && _ref) {
-          ref = _ref
-          unobserve = observe()
-        }
+        sizeRef = _ref
+        if (!sizeRef) return
+
+        unobserve = observe()
       },
 
       unobserve: () => () => {

@@ -2,7 +2,6 @@ import React from 'react'
 import { create } from 'react-test-renderer'
 import { mount } from 'enzyme'
 import sinon from 'sinon'
-import _ from 'lodash'
 
 import {
   compose
@@ -41,6 +40,7 @@ test('should have initialProps', () => {
 
   // Should exports handlers
   expect(props.onScroll).toBeInstanceOf(Function)
+  expect(props.setScrollContainerRef).toBeInstanceOf(Function)
   expect(props.requestScrollTo).toBeInstanceOf(Function)
 })
 
@@ -101,14 +101,10 @@ test('requestScrollTo should set scrollTop with reason', () => {
     removeEventListener: () => {}
   })
 
-  let spiedOnScroll
+  const component = sinon.spy((props) => (
+    <div ref={() => props.setScrollContainerRef(spiedRef)}></div>
+  ))
 
-  const component = sinon.spy((props) => {
-    spiedOnScroll = sinon.spy(props.onScroll)
-    return (
-      <div ref={() => props.setScrollContainerRef(spiedRef)}></div>
-    )
-  })
   component.displayName = 'component'
 
   const enhance = compose(
@@ -149,14 +145,9 @@ test('setScrollContainerRef should call onScroll once', () => {
     removeEventListener: () => {}
   })
 
-  let spiedOnScroll
-
-  const component = sinon.spy((props) => {
-    spiedOnScroll = sinon.spy(props.onScroll)
-    return (
-      <div ref={() => props.setScrollContainerRef(spiedRef)}></div>
-    )
-  })
+  const component = sinon.spy((props) => (
+    <div ref={() => props.setScrollContainerRef(spiedRef)}></div>
+  ))
   component.displayName = 'component'
 
   const enhance = compose(
