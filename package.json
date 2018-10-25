@@ -20,6 +20,14 @@
     "url": "https://github.com/subuta/react-renderless-virtual-list/issues"
   },
   "homepage": "https://github.com/subuta/react-renderless-virtual-list#readme",
+  "jest": {
+    "testEnvironment": "node",
+    "coverageReporters": [
+      "text-summary",
+      "lcov"
+    ],
+    "setupTestFrameworkScriptFile": "<rootDir>/scripts/jest.setup.js"
+  },
   "dependencies": {
     "lodash": "^4.17.11",
     "resize-observer-polyfill": "^1.5.0"
@@ -34,6 +42,7 @@
     "babel-plugin-lodash": "^3.3.4",
     "babel-plugin-module-resolver": "^3.1.1",
     "enzyme": "^3.7.0",
+    "enzyme-adapter-react-16": "^1.6.0",
     "faker": "^4.1.0",
     "jest": "^23.6.0",
     "poi": "^10.2.10",
