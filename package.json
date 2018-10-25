@@ -7,7 +7,8 @@
     "serve": "poi docs/index.js",
     "build": "rollup -c",
     "build:css": "tailwind build ./docs/styles.css -o static/styles.css",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -24,23 +25,30 @@
     "resize-observer-polyfill": "^1.5.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.1",
+    "@babel/core": "^7.1.2",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
     "@babel/preset-env": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
     "babel-plugin-lodash": "^3.3.4",
     "babel-plugin-module-resolver": "^3.1.1",
+    "enzyme": "^3.7.0",
     "faker": "^4.1.0",
+    "jest": "^23.6.0",
     "poi": "^10.2.10",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-hot-loader": "^4.3.11",
+    "react-test-renderer": "^16.6.0",
     "recompose": "^0.30.0",
+    "regenerator-runtime": "^0.12.1",
     "rollup": "^0.66.0",
     "rollup-plugin-babel": "^4.0.3",
     "rollup-plugin-commonjs": "^9.1.6",
     "rollup-plugin-json": "^3.1.0",
     "rollup-plugin-node-resolve": "^3.4.0",
+    "sinon": "^7.1.0",
     "standard": "^12.0.1",
     "tailwindcss": "^0.6.6",
     "why-did-you-update": "^0.1.1"

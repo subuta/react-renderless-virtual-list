@@ -1,0 +1,7 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`city database has Vienna 1`] = `
+<h1>
+  hoge
+</h1>
+`;
