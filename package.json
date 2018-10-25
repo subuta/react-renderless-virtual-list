@@ -21,7 +21,6 @@
   },
   "homepage": "https://github.com/subuta/react-renderless-virtual-list#readme",
   "jest": {
-    "testEnvironment": "node",
     "coverageReporters": [
       "text-summary",
       "lcov"

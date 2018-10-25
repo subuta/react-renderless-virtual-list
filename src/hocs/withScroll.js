@@ -2,7 +2,8 @@ import {
   compose,
   lifecycle,
   withStateHandlers,
-  withHandlers, withPropsOnChange
+  withHandlers,
+  withPropsOnChange
 } from 'recompose'
 import _ from 'lodash'
 
@@ -16,7 +17,7 @@ export default compose(
       scrollReason: SCROLL_REASON_ON_SCROLL_EVENT
     }),
     {
-      onScroll: (state) => (scrollTop) => {
+      onScroll: (state) => (scrollTop, e) => {
         if (state.scrollTop === scrollTop) return
         return {
           scrollTop,
@@ -28,14 +29,6 @@ export default compose(
         if (state.scrollTop === scrollTop) return
         return {
           scrollTop,
-          scrollReason: SCROLL_REASON_REQUESTED
-        }
-      },
-
-      requestScrollToBottom: (state, props) => () => {
-        if (state.scrollTop === props.totalHeight) return
-        return {
-          scrollTop: props.totalHeight,
           scrollReason: SCROLL_REASON_REQUESTED
         }
       }
@@ -55,14 +48,14 @@ export default compose(
         listen = () => {
           scrollContainerRef.addEventListener('scroll', onScroll, { passive: true })
 
-          onScroll(scrollContainerRef.scrollTop)
+          onScroll({})
 
           return () => scrollContainerRef.removeEventListener('scroll', onScroll)
         }
       },
 
-      scrollTo: ({ totalHeight }) => () => {
-        scrollContainerRef.scrollTop = totalHeight
+      scrollTo: () => (scrollTop) => {
+        scrollContainerRef.scrollTop = scrollTop
       },
 
       listen: () => listen
