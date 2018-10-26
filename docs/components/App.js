@@ -30,9 +30,12 @@ export default hot(module)(() => {
                 rows={rows}
                 // reversed
               >
-                {({ row, index, setSizeRef }) => {
+                {({ row, index, setSizeRef, style }) => {
                   return (
-                    <div className={`row-${row.id}`}>
+                    <div
+                      className={`row-${row.id}`}
+                      style={style}
+                    >
                       <div
                         ref={setSizeRef}
                         className='relative px-4 py-2 border-b'

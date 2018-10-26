@@ -8,6 +8,7 @@ import {
   withHandlers,
   withPropsOnChange,
   withProps,
+  defaultProps,
   lifecycle,
   pure
 } from 'recompose'
@@ -15,6 +16,7 @@ import {
 import withScroll from 'src/hocs/withScroll'
 import VirtualListItem from './VirtualListItem'
 
+// Default value of props.
 const defaults = {
   renderListContainer: (props) => {
     const {
@@ -41,6 +43,33 @@ const defaults = {
     )
   },
 
+  renderListItem: (props) => {
+    const {
+      // Will be used as height before render row.
+      rowSize,
+      onMeasure,
+      reversed,
+      row,
+      index,
+      startOfRows
+    } = props
+
+    return (
+      <VirtualListItem
+        key={index}
+        row={row}
+        index={index}
+        onMeasure={onMeasure}
+        defaultRowSize={rowSize}
+        reversed={reversed}
+        // For renderProps.
+        render={props.render}
+        children={props.children}
+        startOfRows={startOfRows}
+      />
+    )
+  },
+
   overScanCount: 3,
 
   height: 300,
@@ -52,44 +81,62 @@ const defaults = {
 }
 
 const enhance = compose(
+  // Specify defaults
+  defaultProps(defaults),
+  // withProps(
+  //   ['renderList', 'renderListContainer', 'renderListItem'],
+  //   ({ renderList, renderListContainer, renderListItem }) => ({
+  //     renderList: _.memoize(renderList),
+  //     renderListContainer: _.memoize(renderListContainer),
+  //     renderListItem: _.memoize(renderListItem)
+  //   })
+  // ),
+  withProps(({ height }) => {
+    return {
+      height: _.isNumber(height) ? height : parseFloat(height, 10),
+    }
+  }),
   pure,
   withStateHandlers(
-    ({ reversed, rows }) => ({
-      heightCache: _.fill(new Array(rows.length), defaults.rowSize.height)
-    }),
+    ({ reversed, rows }) => {
+      const heightCache = _.fill(new Array(rows.length), defaults.rowSize.height)
+      return {
+        heightCache,
+        totalHeight: _.sum(heightCache)
+      }
+    },
     {
-      setHeightCache: (state) => (heightCache) => {
-        if (_.isEqual(state.heightCache, heightCache)) return
-        return { heightCache }
+      mergeHeightCache: (state, { rows }) => (heightCache) => {
+        const nextHeightCache = _.merge([...state.heightCache], heightCache)
+        // console.log('nextHeightCache = ', nextHeightCache)
+        if (_.isEqual(state.heightCache, nextHeightCache)) return
+        return {
+          heightCache: _.merge(_.fill(new Array(rows.length), defaults.rowSize.height), nextHeightCache),
+          totalHeight: _.sum(heightCache)
+        }
       }
     }
   ),
-  // Specify defaults
-  withProps((_props) => {
-    const props = { ...defaults, ..._props }
-
-    const { height, heightCache } = props
-
-    return {
-      ...props,
-      height: _.isNumber(height) ? height : parseFloat(height, 10),
-      // Calculate virtual list height.
-      totalHeight: _.sum(heightCache)
-    }
-  }),
   withScroll,
   withHandlers((props) => {
-    const setHeightCache = _.debounce(props.setHeightCache, 1000 / 30)
+    let debouncedHeightCache = []
+
+    const mergeHeightCache = _.debounce((heightCache) => {
+      props.mergeHeightCache(heightCache)
+      // Clear debouncedHeightCache
+      debouncedHeightCache = []
+    }, 0)
+
     return {
-      setDebouncedHeightCache: ({ heightCache }) => (index, height) => {
-        heightCache[index] = height
-        setHeightCache(heightCache)
+      setHeightCache: () => (index, height) => {
+        debouncedHeightCache[index] = height
+        mergeHeightCache(debouncedHeightCache)
       }
     }
   }),
   withHandlers({
-    onMeasure: ({ setDebouncedHeightCache }) => (index, size) => {
-      setDebouncedHeightCache(index, size.height)
+    onMeasure: ({ setHeightCache }) => (index, size) => {
+      setHeightCache(index, size.height)
     },
 
     calculateIndexes: (props) => () => {
@@ -172,31 +219,6 @@ const enhance = compose(
       }
     },
   }),
-  withHandlers({
-    renderListItem: (props) => ({ row, index, startOfRows }) => {
-      const {
-        // Will be used as height before render row.
-        rowSize,
-        onMeasure,
-        reversed
-      } = props
-
-      return (
-        <VirtualListItem
-          key={index}
-          row={row}
-          index={index}
-          onMeasure={onMeasure}
-          defaultRowSize={rowSize}
-          reversed={reversed}
-          // For renderProps.
-          render={props.render}
-          children={props.children}
-          startOfRows={startOfRows}
-        />
-      )
-    }
-  }),
   withPropsOnChange(
     ['scrollTop', 'height', 'totalHeight'],
     (props) => ({
@@ -248,7 +270,7 @@ export default enhance((props) => {
           if (index < overScanIndex.from || index > overScanIndex.to) return null
           if (startOfRows > endOfRows) return null
 
-          const component = renderListItem({ row, index, startOfRows })
+          const component = renderListItem({ ...props, row, index, startOfRows })
 
           startOfRows += heightCache[index]
 

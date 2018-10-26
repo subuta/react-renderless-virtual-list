@@ -58,7 +58,7 @@ test('should have initialProps', () => {
   expect(props.setSizeRef).toBeInstanceOf(Function)
 })
 
-test('setSizeRef', () => {
+test('setSize on resize of node', () => {
   const withSize = require('src/hocs/withSize').default
 
   const component = sinon.spy((props) => (

@@ -71,7 +71,7 @@ test('should render with style and reversed.', () => {
   // Should call child.
   expect(child.callCount).toBe(1)
 
-  let childProps = wrapper.find('span').props()
+  const childProps = child.firstCall.args[0]
 
   // Should exports props
   expect(childProps.style).toEqual({
@@ -104,7 +104,7 @@ test('should render with style when size set.', () => {
 
   expect(onMeasure.firstCall.args).toEqual([0, { height: 100, width: 100 }])
 
-  let childProps = wrapper.find('span').props()
+  let childProps = child.firstCall.args[0]
 
   // Should exports props
   expect(childProps.style).toEqual({
@@ -130,7 +130,7 @@ test('should render with style when size set.', () => {
 
   expect(onMeasure.secondCall.args).toEqual([0, { height: 200, width: 200 }])
 
-  childProps = wrapper.find('span').props()
+  childProps = child.secondCall.args[0]
 
   // With latest styles.
   expect(childProps.style).toEqual({

@@ -34,8 +34,6 @@ export default enhance((props) => {
     ...rest
   } = props
 
-  const exposed = { row, index, setSizeRef }
-
   let style = {
     position: 'absolute',
     [reversed ? 'bottom' : 'top']: startOfRows,
@@ -52,7 +50,5 @@ export default enhance((props) => {
     }
   }
 
-  return React.cloneElement(renderProps(rest, exposed), {
-    style
-  })
+  return renderProps(rest, { row, index, setSizeRef, style })
 })

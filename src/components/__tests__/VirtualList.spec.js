@@ -9,6 +9,11 @@ import VirtualList from 'src/components/VirtualList'
 
 let clock
 
+import ResizeObserver from 'resize-observer-polyfill'
+
+const mockedObserve = jest.fn()
+const mockedUnobserve = jest.fn()
+
 const mockedRequestScrollTo = jest.fn()
 
 // Mock withScroll while testing.
@@ -23,9 +28,22 @@ jest.mock('src/hocs/withScroll', () => {
   })
 })
 
+// Mock for simulate ResizeObserver at jest(with jsdom) environment.
+jest.mock('resize-observer-polyfill', () => {
+  return jest.fn().mockImplementation(() => {
+    return {
+      observe: mockedObserve,
+      unobserve: mockedUnobserve
+    }
+  })
+})
+
 beforeEach(() => {
   clock = sinon.useFakeTimers()
-  mockedRequestScrollTo.mockClear();
+  mockedRequestScrollTo.mockClear()
+  ResizeObserver.mockClear()
+  mockedObserve.mockClear()
+  mockedUnobserve.mockClear()
 })
 
 afterEach(() => {
@@ -48,9 +66,9 @@ test('should not render with empty rows.', () => {
 })
 
 test('should render with 1 rows.', () => {
-  const child = sinon.spy(({ row, index }) => {
+  const child = sinon.spy(({ row, index, style }) => {
     return (
-      <span className={`row-${index}`}>{row.id}</span>
+      <span className={`row-${index + 1}`} style={style}>{row.id}</span>
     )
   })
 
@@ -77,9 +95,9 @@ test('should render with 1 rows.', () => {
 })
 
 test('should render with height as px', () => {
-  const child = sinon.spy(({ row, index }) => {
+  const child = sinon.spy(({ row, index, style }) => {
     return (
-      <span className={`row-${index}`}>{row.id}</span>
+      <span className={`row-${index + 1}`} style={style}>{row.id}</span>
     )
   })
 
@@ -107,17 +125,39 @@ test('should render with height as px', () => {
 })
 
 test('should re-render at onMeasure call at VirtualListItem', () => {
-  const child = sinon.spy(({ row, index }) => {
+  const child = sinon.spy(({ row, index, style }) => {
     return (
-      <span className={`row-${index}`}>{row.id}</span>
+      <span className={`row-${index + 1}`} style={style}>{row.id}</span>
     )
   })
 
   const rows = _.times(1, (n) => ({ id: n + 1 }))
 
-  const tree = create(
+  let simulateResize = _.noop
+
+  ResizeObserver.mockImplementationOnce(cb => {
+    simulateResize = cb
+    // Delay execution for retrieve ref.
+    requestAnimationFrame(() => cb([
+      {
+        contentRect: {
+          top: 0,
+          right: 200,
+          bottom: 200,
+          left: 0,
+          height: 100,
+          width: 100
+        }
+      }
+    ]))
+    return {
+      observe: mockedObserve,
+      unobserve: mockedUnobserve
+    }
+  })
+
+  mount(
     <VirtualList
-      height="400px"
       rows={rows}
     >
       {child}
@@ -126,23 +166,71 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
 
   expect(child.callCount).toBe(1)
 
-  const props = child.firstCall.args[0]
+  let props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1 })
-  expect(props.index).toEqual(0)
-  expect(props.setSizeRef).toBeInstanceOf(Function)
+  expect(props.style).toEqual({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    minHeight: 100,
+    minWidth: 100
+  })
 
-  // Testing for snapshot.
-  expect(tree.toJSON()).toMatchSnapshot()
+  // At first resize.
+  clock.runAll()
+
+  expect(child.callCount).toBe(2)
+
+  props = child.secondCall.args[0]
+
+  expect(props.style).toEqual({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    minHeight: 100,
+    minWidth: 100,
+    height: 200,
+    width: 200
+  })
+
+  // simulate resize event of element.
+  simulateResize([
+    {
+      contentRect: {
+        top: 0,
+        right: 300,
+        bottom: 300,
+        left: 0,
+        height: 100,
+        width: 100
+      }
+    }
+  ])
+
+  clock.runAll()
+
+  expect(child.callCount).toBe(3)
+
+  props = child.thirdCall.args[0]
+
+  expect(props.style).toEqual({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    minHeight: 100,
+    minWidth: 100,
+    height: 300,
+    width: 300
+  })
 })
 
 test('should render as pure.', () => {
   const renderListContainer = sinon.spy(({ children }) => <div>{children}</div>)
   const renderList = sinon.spy(({ children }) => <div>{children}</div>)
 
-  const child = sinon.spy(({ row, index }) => {
+  const child = sinon.spy(({ row, index, style }) => {
     return (
-      <span className={`row-${index}`}>{row.id}</span>
+      <span className={`row-${index + 1}`} style={style}>{row.id}</span>
     )
   })
 
@@ -178,15 +266,25 @@ test('should render as pure.', () => {
   expect(renderList.callCount).toBe(1)
   expect(child.callCount).toBe(1)
 
+  // TODO: should memoize render child.
+  // // Should not re-render if scrollTop changed.
+  // wrapper.setProps({
+  //   ...initialProps,
+  //   scrollTop: 100
+  // })
+  //
+  // expect(renderListContainer.callCount).toBe(1)
+  // expect(renderList.callCount).toBe(1)
+  // expect(child.callCount).toBe(1)
 })
 
 test('should render with 30 rows.', () => {
   const renderListContainer = sinon.spy(({ children, style }) => <div style={style}>{children}</div>)
   const renderList = sinon.spy(({ children, style }) => <div style={style}>{children}</div>)
 
-  const child = sinon.spy(({ row, index }) => {
+  const child = sinon.spy(({ row, index, style }) => {
     return (
-      <span className={`row-${index}`}>{row.id}</span>
+      <span className={`row-${index + 1}`} style={style}>{row.id}</span>
     )
   })
 
@@ -240,12 +338,26 @@ test('should render with 30 rows.', () => {
   expect(childProps.row).toEqual({ id: 1 })
   expect(childProps.index).toEqual(0)
   expect(childProps.setSizeRef).toBeInstanceOf(Function)
+  expect(childProps.style).toEqual({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    minHeight: 100,
+    minWidth: 100
+  })
 
   const lastCallChildProps = child.lastCall.args[0]
 
   expect(lastCallChildProps.row).toEqual({ id: 7 })
   expect(lastCallChildProps.index).toEqual(6)
   expect(lastCallChildProps.setSizeRef).toBeInstanceOf(Function)
+  expect(lastCallChildProps.style).toEqual({
+    position: 'absolute',
+    top: 600,
+    left: 0,
+    minHeight: 100,
+    minWidth: 100
+  })
 
   // requestScrollTo should called at componentDidMount
   expect(mockedRequestScrollTo).not.toHaveBeenCalled()
@@ -258,9 +370,9 @@ test('should render with reversed 30 rows.', () => {
   const renderListContainer = sinon.spy(({ children }) => <div>{children}</div>)
   const renderList = sinon.spy(({ children }) => <div>{children}</div>)
 
-  const child = sinon.spy(({ row, index }) => {
+  const child = sinon.spy(({ row, index, style }) => {
     return (
-      <span className={`row-${index}`}>{row.id}</span>
+      <span className={`row-${index + 1}`} style={style}>{row.id}</span>
     )
   })
 
@@ -315,12 +427,26 @@ test('should render with reversed 30 rows.', () => {
   expect(childProps.row).toEqual({ id: 24 })
   expect(childProps.index).toEqual(23)
   expect(childProps.setSizeRef).toBeInstanceOf(Function)
+  expect(childProps.style).toEqual({
+    position: 'absolute',
+    bottom: 2300,
+    left: 0,
+    minHeight: 100,
+    minWidth: 100
+  })
 
   const lastCallChildProps = child.lastCall.args[0]
 
   expect(lastCallChildProps.row).toEqual({ id: 30 })
   expect(lastCallChildProps.index).toEqual(29)
   expect(lastCallChildProps.setSizeRef).toBeInstanceOf(Function)
+  expect(lastCallChildProps.style).toEqual({
+    position: 'absolute',
+    bottom: 2900,
+    left: 0,
+    minHeight: 100,
+    minWidth: 100
+  })
 
   // requestScrollTo should called at componentDidMount
   expect(mockedRequestScrollTo).toHaveBeenCalledWith(totalHeight)

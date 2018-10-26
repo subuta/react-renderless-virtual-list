@@ -5,7 +5,7 @@ exports[`should re-render at onMeasure call at VirtualListItem 1`] = `
   className="c-virtual-list-container"
   style={
     Object {
-      "height": 400,
+      "height": 300,
       "overflowX": "auto",
       "width": "100vw",
       "willChange": "transform",
@@ -24,7 +24,7 @@ exports[`should re-render at onMeasure call at VirtualListItem 1`] = `
     }
   >
     <span
-      className="row-0"
+      className="row-1"
       style={
         Object {
           "left": 0,
@@ -65,7 +65,7 @@ exports[`should render with 1 rows. 1`] = `
     }
   >
     <span
-      className="row-0"
+      className="row-1"
       style={
         Object {
           "left": 0,
@@ -104,7 +104,7 @@ exports[`should render with 30 rows. 1`] = `
     }
   >
     <span
-      className="row-0"
+      className="row-1"
       style={
         Object {
           "left": 0,
@@ -118,7 +118,7 @@ exports[`should render with 30 rows. 1`] = `
       1
     </span>
     <span
-      className="row-1"
+      className="row-2"
       style={
         Object {
           "left": 0,
@@ -132,7 +132,7 @@ exports[`should render with 30 rows. 1`] = `
       2
     </span>
     <span
-      className="row-2"
+      className="row-3"
       style={
         Object {
           "left": 0,
@@ -146,7 +146,7 @@ exports[`should render with 30 rows. 1`] = `
       3
     </span>
     <span
-      className="row-3"
+      className="row-4"
       style={
         Object {
           "left": 0,
@@ -160,7 +160,7 @@ exports[`should render with 30 rows. 1`] = `
       4
     </span>
     <span
-      className="row-4"
+      className="row-5"
       style={
         Object {
           "left": 0,
@@ -174,7 +174,7 @@ exports[`should render with 30 rows. 1`] = `
       5
     </span>
     <span
-      className="row-5"
+      className="row-6"
       style={
         Object {
           "left": 0,
@@ -188,7 +188,7 @@ exports[`should render with 30 rows. 1`] = `
       6
     </span>
     <span
-      className="row-6"
+      className="row-7"
       style={
         Object {
           "left": 0,
@@ -229,7 +229,7 @@ exports[`should render with height as px 1`] = `
     }
   >
     <span
-      className="row-0"
+      className="row-1"
       style={
         Object {
           "left": 0,
@@ -250,7 +250,7 @@ exports[`should render with reversed 30 rows. 1`] = `
 <div>
   <div>
     <span
-      className="row-23"
+      className="row-24"
       style={
         Object {
           "bottom": 2300,
@@ -264,7 +264,7 @@ exports[`should render with reversed 30 rows. 1`] = `
       24
     </span>
     <span
-      className="row-24"
+      className="row-25"
       style={
         Object {
           "bottom": 2400,
@@ -278,7 +278,7 @@ exports[`should render with reversed 30 rows. 1`] = `
       25
     </span>
     <span
-      className="row-25"
+      className="row-26"
       style={
         Object {
           "bottom": 2500,
@@ -292,7 +292,7 @@ exports[`should render with reversed 30 rows. 1`] = `
       26
     </span>
     <span
-      className="row-26"
+      className="row-27"
       style={
         Object {
           "bottom": 2600,
@@ -306,7 +306,7 @@ exports[`should render with reversed 30 rows. 1`] = `
       27
     </span>
     <span
-      className="row-27"
+      className="row-28"
       style={
         Object {
           "bottom": 2700,
@@ -320,7 +320,7 @@ exports[`should render with reversed 30 rows. 1`] = `
       28
     </span>
     <span
-      className="row-28"
+      className="row-29"
       style={
         Object {
           "bottom": 2800,
@@ -334,7 +334,7 @@ exports[`should render with reversed 30 rows. 1`] = `
       29
     </span>
     <span
-      className="row-29"
+      className="row-30"
       style={
         Object {
           "bottom": 2900,
