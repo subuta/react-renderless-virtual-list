@@ -3,8 +3,6 @@ import { create } from 'react-test-renderer'
 import { mount } from 'enzyme'
 import sinon from 'sinon'
 
-import _ from 'lodash'
-
 import {
   compose
 } from 'recompose'

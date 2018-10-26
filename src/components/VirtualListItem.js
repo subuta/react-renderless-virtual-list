@@ -11,15 +11,15 @@ import renderProps from 'src/utils/renderProps'
 import withSize from 'src/hocs/withSize'
 
 const enhance = compose(
-  pure,
   withSize,
   withPropsOnChange(
     (props, nextProps) => !_.isEqual(props.size, nextProps.size),
-    ({ onMeasure = _.noop, index, size }) => {
+    ({ onMeasure = _.noop, index, size = {} }) => {
       if (!size.height || !size.width) return
       onMeasure(index, size)
     }
-  )
+  ),
+  pure
 )
 
 export default enhance((props) => {
@@ -28,7 +28,7 @@ export default enhance((props) => {
     setSizeRef,
     row,
     index,
-    size,
+    size = {},
     startOfRows,
     reversed = false,
     ...rest
