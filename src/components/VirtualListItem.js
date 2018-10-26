@@ -24,27 +24,35 @@ const enhance = compose(
 
 export default enhance((props) => {
   const {
-    defaultRowHeight,
+    size = {},
+    defaultRowSize = {},
+    reversed = false,
     setSizeRef,
     row,
     index,
-    size = {},
     startOfRows,
-    reversed = false,
     ...rest
   } = props
 
-  const style = size.height && size.width ? {
+  const exposed = { row, index, setSizeRef }
+
+  let style = {
     position: 'absolute',
     [reversed ? 'bottom' : 'top']: startOfRows,
     left: 0,
-    height: size.height,
-    width: size.width
-  } : { minHeight: defaultRowHeight }
+    minHeight: defaultRowSize.height,
+    minWidth: defaultRowSize.width
+  }
 
-  const exposed = { row, index, setSizeRef }
+  if (size.height && size.width) {
+    style = {
+      ...style,
+      height: size.height,
+      width: size.width
+    }
+  }
 
   return React.cloneElement(renderProps(rest, exposed), {
-    style: style
+    style
   })
 })

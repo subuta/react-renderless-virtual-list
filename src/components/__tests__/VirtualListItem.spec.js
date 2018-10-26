@@ -1,7 +1,6 @@
 import React from 'react'
 import { mount } from 'enzyme'
 import sinon from 'sinon'
-import { create } from 'react-test-renderer'
 
 import _ from 'lodash'
 

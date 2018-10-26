@@ -54,10 +54,10 @@ test('should render passed render function', () => {
 test('should render null', () => {
   const Component = sinon.spy((props) => renderProps(props, {}))
 
-  const rendered = create(
+  const tree = create(
     <Component />
   )
 
   // Should not render anything.
-  expect(rendered.toJSON()).toBe(null)
+  expect(tree.toJSON()).toBe(null)
 })

@@ -7,49 +7,56 @@ import {
   withStateHandlers,
   withHandlers,
   withPropsOnChange,
-  withState,
   withProps,
-  lifecycle
+  lifecycle,
+  pure
 } from 'recompose'
 
 import withScroll from 'src/hocs/withScroll'
 import VirtualListItem from './VirtualListItem'
 
-const defaultRenderListContainer = (props) => {
-  const {
-    className = 'c-virtual-list-container',
-    children,
-    style,
-    setScrollContainerRef
-  } = props
+const defaults = {
+  renderListContainer: (props) => {
+    const {
+      className = 'c-virtual-list-container',
+      children,
+      style,
+      setScrollContainerRef
+    } = props
 
-  return (
-    <div ref={setScrollContainerRef} className={className} style={style}>{children}</div>
-  )
-}
+    return (
+      <div ref={setScrollContainerRef} className={className} style={style}>{children}</div>
+    )
+  },
 
-const defaultRenderList = (props) => {
-  const {
-    className = 'c-virtual-list',
-    children,
-    style
-  } = props
+  renderList: (props) => {
+    const {
+      className = 'c-virtual-list',
+      children,
+      style
+    } = props
 
-  return (
-    <div className={className} style={style}>{children}</div>
-  )
+    return (
+      <div className={className} style={style}>{children}</div>
+    )
+  },
+
+  overScanCount: 3,
+
+  height: 300,
+
+  rowSize: {
+    height: 100,
+    width: 100
+  }
 }
 
 const enhance = compose(
-  withState('heightCache', 'setHeightCache', ({ reversed, rows, defaultRowHeight = 100 }) => {
-    return reversed ? _.fill(new Array(rows.length), defaultRowHeight) : []
-  }),
+  pure,
   withStateHandlers(
-    ({ reversed, rows, defaultRowHeight = 100 }) => {
-      return {
-        heightCache: reversed ? _.fill(new Array(rows.length), defaultRowHeight) : []
-      }
-    },
+    ({ reversed, rows }) => ({
+      heightCache: _.fill(new Array(rows.length), defaults.rowSize.height)
+    }),
     {
       setHeightCache: (state) => (heightCache) => {
         if (_.isEqual(state.heightCache, heightCache)) return
@@ -58,27 +65,16 @@ const enhance = compose(
     }
   ),
   // Specify defaults
-  withProps((props) => {
-    const {
-      defaultRowHeight = 100,
-      height = 300,
-      overScanCount = 3,
-      renderList = defaultRenderList,
-      renderListContainer = defaultRenderListContainer,
-      heightCache
-    } = props
+  withProps((_props) => {
+    const props = { ...defaults, ..._props }
 
-    // Calculate virtual list height.
-    const totalHeight = _.sum(heightCache)
+    const { height, heightCache } = props
 
     return {
-      totalHeight,
-      overScanCount,
-      renderList,
-      renderListContainer,
-      defaultRowHeight,
-      // parse `100px` or 100
-      height: _.isNumber(height) ? height : parseFloat(height, 10)
+      ...props,
+      height: _.isNumber(height) ? height : parseFloat(height, 10),
+      // Calculate virtual list height.
+      totalHeight: _.sum(heightCache)
     }
   }),
   withScroll,
@@ -98,23 +94,21 @@ const enhance = compose(
 
     calculateIndexes: (props) => () => {
       const {
+        scrollTop = 0,
         heightCache,
         rows,
-        scrollTop,
         height,
         overScanCount,
-        defaultRowHeight,
+        totalHeight,
         reversed
       } = props
-
-      // Calculate virtual list height.
-      const totalHeight = _.sum(heightCache)
 
       let sum = 0
       let visibleIndex = { from: -1, to: 0 }
 
       // Start position of rows.
       let startOfRows = reversed ? (totalHeight - (scrollTop + height)) : 0
+
       // End position of rows.
       let endOfRows = reversed ? (startOfRows + height) : scrollTop + height
 
@@ -134,20 +128,6 @@ const enhance = compose(
 
         return true
       })
-
-      // Use temporary value while heightCache is empty.
-      if (visibleIndex.to === 0) {
-        return {
-          overScanIndex: {
-            from: 0,
-            to: rows.length - 1
-          },
-          positions: {
-            start: 0,
-            end: scrollTop + height + (overScanCount * defaultRowHeight)
-          }
-        }
-      }
 
       const overScanIndex = {
         from: visibleIndex.from - overScanCount >= 0 ? visibleIndex.from - overScanCount : 0,
@@ -172,14 +152,12 @@ const enhance = compose(
       // Calculate virtual list height.
       const totalHeight = _.sum(heightCache)
 
-      if (totalHeight === 0) return {}
-
-      const containerStyle = height ? {
+      const containerStyle = {
         height,
         width: '100vw',
         overflowX: 'auto',
         willChange: 'transform'
-      } : {}
+      }
 
       const listStyle = {
         position: 'relative',
@@ -198,7 +176,7 @@ const enhance = compose(
     renderListItem: (props) => ({ row, index, startOfRows }) => {
       const {
         // Will be used as height before render row.
-        defaultRowHeight,
+        rowSize,
         onMeasure,
         reversed
       } = props
@@ -209,7 +187,7 @@ const enhance = compose(
           row={row}
           index={index}
           onMeasure={onMeasure}
-          defaultRowHeight={defaultRowHeight}
+          defaultRowSize={rowSize}
           reversed={reversed}
           // For renderProps.
           render={props.render}
@@ -226,18 +204,11 @@ const enhance = compose(
       ...props.getStyles()
     })
   ),
-  withPropsOnChange(
-    ['renderList', 'renderListContainer', 'renderListItem'],
-    ({ renderList, renderListContainer, renderListItem }) => ({
-      renderList: _.memoize(renderList),
-      renderListContainer: _.memoize(renderListContainer),
-      renderListItem: _.memoize(renderListItem, (props) => `${props.index}-${props.startOfRows}`),
-    })
-  ),
   lifecycle({
     componentDidMount () {
       if (this.props.reversed) {
-        _.delay(() => this.props.requestScrollToBottom(), 0)
+        // Should rendered from bottom position if reversed.
+        _.delay(() => this.props.requestScrollTo(this.props.totalHeight), 0)
       }
     }
   })
@@ -249,12 +220,11 @@ export default enhance((props) => {
     containerStyle = {},
     listStyle = {},
     // Will be used as height before render row.
-    defaultRowHeight,
     overScanIndex = {
       from: 0,
       to: rows.length - 1
     },
-    heightCache,
+    heightCache = [],
     renderList,
     setScrollContainerRef,
     renderListItem,
@@ -280,7 +250,7 @@ export default enhance((props) => {
 
           const component = renderListItem({ row, index, startOfRows })
 
-          startOfRows += heightCache[index] || defaultRowHeight
+          startOfRows += heightCache[index]
 
           return component
         })}
