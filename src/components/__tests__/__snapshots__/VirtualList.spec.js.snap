@@ -1,46 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`should re-render at onMeasure call at VirtualListItem 1`] = `
-<div
-  className="c-virtual-list-container"
-  style={
-    Object {
-      "height": 300,
-      "overflowX": "auto",
-      "width": "100vw",
-      "willChange": "transform",
-    }
-  }
->
-  <div
-    className="c-virtual-list"
-    style={
-      Object {
-        "height": 100,
-        "minHeight": "100%",
-        "position": "relative",
-        "width": "100%",
-      }
-    }
-  >
-    <span
-      className="row-1"
-      style={
-        Object {
-          "left": 0,
-          "minHeight": 100,
-          "minWidth": 100,
-          "position": "absolute",
-          "top": 0,
-        }
-      }
-    >
-      1
-    </span>
-  </div>
-</div>
-`;
-
 exports[`should render with 1 rows. 1`] = `
 <div
   className="c-virtual-list-container"

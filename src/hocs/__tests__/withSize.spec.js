@@ -6,6 +6,8 @@ import {
   compose
 } from 'recompose'
 
+import _ from 'lodash'
+
 import ResizeObserver from 'resize-observer-polyfill'
 
 const mockedObserve = jest.fn()
@@ -56,6 +58,30 @@ test('should have initialProps', () => {
   //
   // // Should exports handlers
   expect(props.setSizeRef).toBeInstanceOf(Function)
+})
+
+test('should render as pure.', () => {
+  const withSize = require('src/hocs/withSize').default
+
+  const initialProps = {}
+
+  const component = sinon.spy(() => null)
+  component.displayName = 'component'
+
+  const enhance = compose(
+    withSize
+  )
+
+  const Component = enhance(component)
+
+  const wrapper = mount(<Component {...initialProps} />)
+
+  // Should call child.
+  expect(component.callCount).toBe(1)
+
+  // Should not re-render if props not changed.
+  wrapper.setProps(initialProps)
+  expect(component.callCount).toBe(1)
 })
 
 test('setSize on resize of node', () => {

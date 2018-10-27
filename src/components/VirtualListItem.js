@@ -3,14 +3,16 @@ import _ from 'lodash'
 
 import {
   compose,
+  toRenderProps,
   pure,
+  withProps,
   withPropsOnChange
 } from 'recompose'
 
-import renderProps from 'src/utils/renderProps'
 import withSize from 'src/hocs/withSize'
 
 const enhance = compose(
+  pure,
   withSize,
   withPropsOnChange(
     (props, nextProps) => !_.isEqual(props.size, nextProps.size),
@@ -19,36 +21,35 @@ const enhance = compose(
       onMeasure(index, size)
     }
   ),
-  pure
+  withProps((props) => {
+    const {
+      size = {},
+      defaultRowSize = {},
+      reversed = false,
+      setSizeRef,
+      row,
+      index,
+      startOfRows
+    } = props
+
+    let style = {
+      position: 'absolute',
+      [reversed ? 'bottom' : 'top']: startOfRows,
+      left: 0,
+      minHeight: defaultRowSize.height,
+      minWidth: defaultRowSize.width
+    }
+
+    if (size.height && size.width) {
+      style = {
+        ...style,
+        height: size.height,
+        width: size.width
+      }
+    }
+
+    return { row, index, setSizeRef, style }
+  })
 )
 
-export default enhance((props) => {
-  const {
-    size = {},
-    defaultRowSize = {},
-    reversed = false,
-    setSizeRef,
-    row,
-    index,
-    startOfRows,
-    ...rest
-  } = props
-
-  let style = {
-    position: 'absolute',
-    [reversed ? 'bottom' : 'top']: startOfRows,
-    left: 0,
-    minHeight: defaultRowSize.height,
-    minWidth: defaultRowSize.width
-  }
-
-  if (size.height && size.width) {
-    style = {
-      ...style,
-      height: size.height,
-      width: size.width
-    }
-  }
-
-  return renderProps(rest, { row, index, setSizeRef, style })
-})
+export default toRenderProps(enhance)

@@ -63,7 +63,6 @@ const defaults = {
         defaultRowSize={rowSize}
         reversed={reversed}
         // For renderProps.
-        render={props.render}
         children={props.children}
         startOfRows={startOfRows}
       />
@@ -81,22 +80,18 @@ const defaults = {
 }
 
 const enhance = compose(
+  pure,
   // Specify defaults
   defaultProps(defaults),
-  // withProps(
-  //   ['renderList', 'renderListContainer', 'renderListItem'],
-  //   ({ renderList, renderListContainer, renderListItem }) => ({
-  //     renderList: _.memoize(renderList),
-  //     renderListContainer: _.memoize(renderListContainer),
-  //     renderListItem: _.memoize(renderListItem)
-  //   })
-  // ),
+  withProps(({ renderList, renderListContainer, renderListItem }) => ({
+    renderListItem: _.memoize(renderListItem, ({ index, startOfRows }) => `row-${index}-${startOfRows}`)
+  })),
   withProps(({ height }) => {
+    if (height === 0) return { height: defaults.height }
     return {
       height: _.isNumber(height) ? height : parseFloat(height, 10),
     }
   }),
-  pure,
   withStateHandlers(
     ({ reversed, rows }) => {
       const heightCache = _.fill(new Array(rows.length), defaults.rowSize.height)
@@ -195,10 +190,7 @@ const enhance = compose(
       }
     },
 
-    getStyles: ({ heightCache, height }) => () => {
-      // Calculate virtual list height.
-      const totalHeight = _.sum(heightCache)
-
+    getStyles: ({ totalHeight, heightCache, height }) => () => {
       const containerStyle = {
         height,
         width: '100vw',

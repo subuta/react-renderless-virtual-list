@@ -1,21 +1,16 @@
 import React from 'react'
 
 import {
-  compose
+  compose,
+  pure,
+  toRenderProps
 } from 'recompose'
 
 import withSize from 'src/hocs/withSize'
-import renderProps from 'src/utils/renderProps'
 
 const enhance = compose(
+  pure,
   withSize
 )
 
-export default enhance(({ render, children, size, setSizeRef }) => {
-  const exposed = {
-    size
-  }
-  return React.cloneElement(renderProps({ render, children }, exposed), {
-    ref: setSizeRef
-  })
-})
+export default toRenderProps(enhance)

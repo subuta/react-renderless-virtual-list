@@ -3,12 +3,14 @@ import {
   lifecycle,
   withHandlers,
   withState,
+  pure
 } from 'recompose'
 import _ from 'lodash'
 
 import ResizeObserver from 'resize-observer-polyfill'
 
 export default compose(
+  pure,
   withState('size', 'setSize', { height: 0, width: 0 }),
   withHandlers({
     onResize: ({ size, setSize }) => (el, entries) => {

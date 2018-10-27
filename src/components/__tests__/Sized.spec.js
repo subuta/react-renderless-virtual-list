@@ -24,3 +24,24 @@ test('should render with size.', () => {
   // Should exports props
   expect(props.size).toEqual({ height: 0, width: 0 })
 })
+
+test('should render as pure.', () => {
+  const initialProps = {}
+
+  const child = sinon.spy(() => (
+    <span>hoge</span>
+  ))
+
+  const wrapper = mount(
+    <Sized {...initialProps}>
+      {child}
+    </Sized>
+  )
+
+  // Should call child.
+  expect(child.callCount).toBe(1)
+
+  // Should not re-render if props not changed.
+  wrapper.setProps(initialProps)
+  expect(child.callCount).toBe(1)
+})

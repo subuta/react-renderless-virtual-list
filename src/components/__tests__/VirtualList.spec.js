@@ -224,7 +224,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
   })
 })
 
-test('should render as pure.', () => {
+test('should render child as pure.', () => {
   const renderListContainer = sinon.spy(({ children }) => <div>{children}</div>)
   const renderList = sinon.spy(({ children }) => <div>{children}</div>)
 
@@ -267,15 +267,15 @@ test('should render as pure.', () => {
   expect(child.callCount).toBe(1)
 
   // TODO: should memoize render child.
-  // // Should not re-render if scrollTop changed.
-  // wrapper.setProps({
-  //   ...initialProps,
-  //   scrollTop: 100
-  // })
-  //
-  // expect(renderListContainer.callCount).toBe(1)
-  // expect(renderList.callCount).toBe(1)
-  // expect(child.callCount).toBe(1)
+  // Should not re-render if scrollTop changed.
+  wrapper.setProps({
+    ...initialProps,
+    scrollTop: 100
+  })
+
+  expect(renderListContainer.callCount).toBe(2)
+  expect(renderList.callCount).toBe(2)
+  expect(child.callCount).toBe(1)
 })
 
 test('should render with 30 rows.', () => {
