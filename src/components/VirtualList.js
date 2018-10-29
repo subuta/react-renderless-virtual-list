@@ -18,7 +18,6 @@ import withScroll from 'src/hocs/withScroll'
 import VirtualListItem from './VirtualListItem'
 
 export const SCROLL_DIRECTION_UP = 'SCROLL_DIRECTION_UP'
-export const SCROLL_DIRECTION_NONE = 'SCROLL_DIRECTION_NONE'
 export const SCROLL_DIRECTION_DOWN = 'SCROLL_DIRECTION_DOWN'
 
 // Default value of props.
@@ -99,10 +98,10 @@ const enhance = compose(
   }),
   withStateHandlers(
     ({ reversed, rows }) => {
-      const heightCache = _.fill(new Array(rows.length), defaults.rowSize.height)
+      const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
       return {
-        heightCache,
-        totalHeight: _.sum(heightCache),
+        heightCache: fill,
+        totalHeight: _.sum(fill),
         hasRendered: false
       }
     },
@@ -115,7 +114,22 @@ const enhance = compose(
           totalHeight: _.sum(nextHeightCache),
           hasRendered: true // Mark as initial rendered.
         }
+      },
+
+      rememberTotalHeight: () => (totalHeight) => {
+        return {
+          hasRendered: false,
+          lastTotalHeight: totalHeight
+        }
       }
+    }
+  ),
+  withPropsOnChange(
+    ['rows'],
+    ({ rows, heightCache, totalHeight, mergeHeightCache, rememberTotalHeight }) => {
+      const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
+      mergeHeightCache(_.merge(fill, heightCache))
+      rememberTotalHeight(totalHeight)
     }
   ),
   withScroll,
@@ -136,7 +150,9 @@ const enhance = compose(
     }
   }),
   withHandlers(() => {
-    let lastScrollTop = 0
+    let lastScrollTop = -1
+    let lastTotalHeight = 0
+    let isAdjusted = false
 
     return {
       onMeasure: ({ setHeightCache }) => (index, size) => {
@@ -146,7 +162,8 @@ const enhance = compose(
       handleScroll: (props) => () => {
         const {
           scrollTop = 0,
-          onScroll = _.noop,
+          onScroll,
+          onLoadMore,
           heightCache,
           rows,
           height,
@@ -192,14 +209,27 @@ const enhance = compose(
 
         const direction = lastScrollTop > scrollTop ? SCROLL_DIRECTION_UP : SCROLL_DIRECTION_DOWN
 
-        onScroll({
-          scrollTop,
-          direction,
-          visibleIndex,
-          overScanIndex
-        })
-
         lastScrollTop = scrollTop
+        lastTotalHeight = totalHeight
+
+        // Call onScroll.
+        if (onScroll) {
+          requestAnimationFrame(() => onScroll({
+            scrollTop,
+            direction,
+            visibleIndex,
+            overScanIndex
+          }))
+        }
+
+        if (onLoadMore && overScanIndex.to >= rows.length - 1) {
+          requestAnimationFrame(() => onLoadMore({
+            scrollTop,
+            direction,
+            visibleIndex,
+            overScanIndex
+          }))
+        }
 
         return {
           visibleIndex,
@@ -232,8 +262,11 @@ const enhance = compose(
         }
       },
 
-      requestScrollToBottom: ({ requestScrollTo, totalHeight }) => () => {
-        requestScrollTo(totalHeight)
+      adjustScrollTop: ({ requestScrollTo, totalHeight, lastTotalHeight }) => () => {
+        const nextScrollTop = totalHeight - lastTotalHeight
+        requestScrollTo(isAdjusted ? nextScrollTop : totalHeight)
+
+        isAdjusted = true
       }
     }
   }),
@@ -248,7 +281,7 @@ const enhance = compose(
     ['hasRendered'],
     (props) => {
       if (!props.reversed || !props.hasRendered) return
-      _.delay(() => props.requestScrollToBottom(), 0)
+      _.delay(() => props.adjustScrollTop(), 0)
     }
   )
 )

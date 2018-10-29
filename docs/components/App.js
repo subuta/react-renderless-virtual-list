@@ -5,8 +5,6 @@ import _ from 'lodash'
 import faker from 'faker'
 
 import {
-  SCROLL_DIRECTION_UP,
-
   VirtualList,
   Sized
 } from 'src'
@@ -64,15 +62,13 @@ const enhance = compose(
     ({ loadRows }) => ({ loadRows: _.debounce(loadRows, 1000 / 16, { leading: true, trailing: false }) })
   ),
   withHandlers({
-    onScroll: ({ rows, loadRows }) => ({ direction, overScanIndex }) => {
-      if (direction === SCROLL_DIRECTION_UP && overScanIndex.to >= rows.length - 1) {
-        loadRows()
-      }
+    onLoadMore: ({ loadRows }) => () => {
+      loadRows()
     }
   })
 )
 
-export default enhance(({ rows, onScroll }) => {
+export default enhance(({ rows, onScroll, onLoadMore }) => {
   return (
     <div className='flex flex-col h-screen'>
       <header className='p-4 flex-0 border-b-2'>Fixed header area</header>
@@ -85,6 +81,7 @@ export default enhance(({ rows, onScroll }) => {
               ref={setSizeRef}
             >
               <VirtualList
+                onLoadMore={onLoadMore}
                 onScroll={onScroll}
                 height={size.height}
                 rows={rows}
