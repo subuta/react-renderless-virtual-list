@@ -98,7 +98,8 @@ const enhance = compose(
       const heightCache = _.fill(new Array(rows.length), defaults.rowSize.height)
       return {
         heightCache,
-        totalHeight: _.sum(heightCache)
+        totalHeight: _.sum(heightCache),
+        hasRendered: false
       }
     },
     {
@@ -107,7 +108,8 @@ const enhance = compose(
         if (_.isEqual(state.heightCache, nextHeightCache)) return
         return {
           heightCache: nextHeightCache,
-          totalHeight: _.sum(nextHeightCache)
+          totalHeight: _.sum(nextHeightCache),
+          hasRendered: true // Mark as initial rendered.
         }
       }
     }
@@ -212,6 +214,7 @@ const enhance = compose(
     },
 
     requestScrollToBottom: ({ requestScrollTo, totalHeight }) => () => {
+      console.log(totalHeight)
       requestScrollTo(totalHeight)
     }
   }),
@@ -222,14 +225,13 @@ const enhance = compose(
       ...props.getStyles()
     })
   ),
-  lifecycle({
-    componentDidMount () {
-      if (this.props.reversed) {
-        // Should rendered from bottom position if reversed.
-        _.delay(() => this.props.requestScrollToBottom(), 2000)
-      }
+  withPropsOnChange(
+    ['hasRendered'],
+    (props) => {
+      if (!props.hasRendered) return
+      _.delay(() => props.requestScrollToBottom(), 0)
     }
-  })
+  )
 )
 
 export default enhance((props) => {

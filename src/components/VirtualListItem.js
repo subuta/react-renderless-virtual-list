@@ -35,17 +35,18 @@ const enhance = compose(
     let style = {
       position: 'absolute',
       [reversed ? 'bottom' : 'top']: startOfRows,
-      left: 0,
-      minHeight: defaultRowSize.height,
-      minWidth: defaultRowSize.width
+      left: 0
     }
 
-    if (size.height && size.width) {
+    if (size.height) {
       style = {
         ...style,
         height: size.height
-        // Ignore width for better row style at resize.
-        // width: size.width
+      }
+    } else {
+      style = {
+        ...style,
+        minHeight: defaultRowSize.height
       }
     }
 
