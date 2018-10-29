@@ -79,8 +79,6 @@ test('should render with style and reversed.', () => {
     position: 'absolute',
     bottom: 0,
     left: 0,
-    minHeight: 100,
-    minWidth: 100,
     height: 100
   })
 })
@@ -114,8 +112,6 @@ test('should render with style when size set.', () => {
     position: 'absolute',
     top: 0,
     left: 0,
-    minHeight: 100,
-    minWidth: 100,
     height: 100
   })
 
@@ -141,8 +137,6 @@ test('should render with style when size set.', () => {
     position: 'absolute',
     top: 100,
     left: 0,
-    minHeight: 100,
-    minWidth: 100,
     height: 200
   })
 })

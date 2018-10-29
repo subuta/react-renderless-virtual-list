@@ -29,7 +29,6 @@ exports[`should render with 1 rows. 1`] = `
         Object {
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
           "top": 0,
         }
@@ -68,7 +67,6 @@ exports[`should render with 30 rows. 1`] = `
         Object {
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
           "top": 0,
         }
@@ -82,7 +80,6 @@ exports[`should render with 30 rows. 1`] = `
         Object {
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
           "top": 100,
         }
@@ -96,7 +93,6 @@ exports[`should render with 30 rows. 1`] = `
         Object {
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
           "top": 200,
         }
@@ -110,7 +106,6 @@ exports[`should render with 30 rows. 1`] = `
         Object {
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
           "top": 300,
         }
@@ -124,7 +119,6 @@ exports[`should render with 30 rows. 1`] = `
         Object {
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
           "top": 400,
         }
@@ -138,7 +132,6 @@ exports[`should render with 30 rows. 1`] = `
         Object {
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
           "top": 500,
         }
@@ -152,7 +145,6 @@ exports[`should render with 30 rows. 1`] = `
         Object {
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
           "top": 600,
         }
@@ -193,7 +185,6 @@ exports[`should render with height as px 1`] = `
         Object {
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
           "top": 0,
         }
@@ -215,7 +206,6 @@ exports[`should render with reversed 30 rows. 1`] = `
           "bottom": 2300,
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
         }
       }
@@ -229,7 +219,6 @@ exports[`should render with reversed 30 rows. 1`] = `
           "bottom": 2400,
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
         }
       }
@@ -243,7 +232,6 @@ exports[`should render with reversed 30 rows. 1`] = `
           "bottom": 2500,
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
         }
       }
@@ -257,7 +245,6 @@ exports[`should render with reversed 30 rows. 1`] = `
           "bottom": 2600,
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
         }
       }
@@ -271,7 +258,6 @@ exports[`should render with reversed 30 rows. 1`] = `
           "bottom": 2700,
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
         }
       }
@@ -285,7 +271,6 @@ exports[`should render with reversed 30 rows. 1`] = `
           "bottom": 2800,
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
         }
       }
@@ -299,7 +284,6 @@ exports[`should render with reversed 30 rows. 1`] = `
           "bottom": 2900,
           "left": 0,
           "minHeight": 100,
-          "minWidth": 100,
           "position": "absolute",
         }
       }

@@ -214,7 +214,6 @@ const enhance = compose(
     },
 
     requestScrollToBottom: ({ requestScrollTo, totalHeight }) => () => {
-      console.log(totalHeight)
       requestScrollTo(totalHeight)
     }
   }),
@@ -228,7 +227,7 @@ const enhance = compose(
   withPropsOnChange(
     ['hasRendered'],
     (props) => {
-      if (!props.hasRendered) return
+      if (!props.reversed || !props.hasRendered) return
       _.delay(() => props.requestScrollToBottom(), 0)
     }
   )

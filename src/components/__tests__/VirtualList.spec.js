@@ -172,8 +172,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
     position: 'absolute',
     top: 0,
     left: 0,
-    minHeight: 100,
-    minWidth: 100
+    minHeight: 100
   })
 
   // At first resize.
@@ -187,8 +186,6 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
     position: 'absolute',
     top: 0,
     left: 0,
-    minHeight: 100,
-    minWidth: 100,
     height: 200
   })
 
@@ -216,8 +213,6 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
     position: 'absolute',
     top: 0,
     left: 0,
-    minHeight: 100,
-    minWidth: 100,
     height: 300
   })
 })
@@ -340,8 +335,7 @@ test('should render with 30 rows.', () => {
     position: 'absolute',
     top: 0,
     left: 0,
-    minHeight: 100,
-    minWidth: 100
+    minHeight: 100
   })
 
   const lastCallChildProps = child.lastCall.args[0]
@@ -353,8 +347,7 @@ test('should render with 30 rows.', () => {
     position: 'absolute',
     top: 600,
     left: 0,
-    minHeight: 100,
-    minWidth: 100
+    minHeight: 100
   })
 
   // requestScrollTo should called at componentDidMount
@@ -429,8 +422,7 @@ test('should render with reversed 30 rows.', () => {
     position: 'absolute',
     bottom: 2300,
     left: 0,
-    minHeight: 100,
-    minWidth: 100
+    minHeight: 100
   })
 
   const lastCallChildProps = child.lastCall.args[0]
@@ -442,12 +434,8 @@ test('should render with reversed 30 rows.', () => {
     position: 'absolute',
     bottom: 2900,
     left: 0,
-    minHeight: 100,
-    minWidth: 100
+    minHeight: 100
   })
-
-  // requestScrollTo should called at componentDidMount
-  expect(mockedRequestScrollTo).toHaveBeenCalledWith(totalHeight)
 
   // Testing for snapshot.
   expect(tree.toJSON()).toMatchSnapshot()
