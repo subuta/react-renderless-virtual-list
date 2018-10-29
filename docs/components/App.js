@@ -5,16 +5,18 @@ import _ from 'lodash'
 import faker from 'faker'
 
 import {
+  SCROLL_DIRECTION_UP,
+
   VirtualList,
   Sized
 } from 'src'
 
-const rows = _.times(30, (index) => {
-  // Fix faker seed for getting same result.
-  faker.seed(index)
-  const text = faker.lorem.paragraphs()
-  return { id: index + 1, text }
-})
+import {
+  compose,
+  withHandlers,
+  withStateHandlers,
+  withPropsOnChange
+} from 'recompose'
 
 const renderList = ({ row, index, setSizeRef, style }) => {
   return (
@@ -34,30 +36,65 @@ const renderList = ({ row, index, setSizeRef, style }) => {
   )
 }
 
-const render = ({size, setSizeRef}) => {
-  return (
-    <div
-      className='flex-1 overflow-hidden'
-      ref={setSizeRef}
-    >
-      <VirtualList
-        height={size.height}
-        rows={rows}
-        reversed
-      >
-        {renderList}
-      </VirtualList>
-    </div>
-  )
+// Initial rows count
+const ROWS_COUNT = 30
+
+const createFakeRow = (index) => {
+  // Fix faker seed for getting same result.
+  faker.seed(index)
+  const text = faker.lorem.paragraphs()
+  return { id: index + 1, text }
 }
 
-export default hot(module)(() => {
+const enhance = compose(
+  hot(module),
+  withStateHandlers(
+    () => ({
+      rows: _.times(ROWS_COUNT, createFakeRow)
+    }),
+    {
+      loadRows: ({ rows }) => () => {
+        const nextRows = [...rows, ..._.map(_.range(rows.length, rows.length + ROWS_COUNT), createFakeRow)]
+        return { rows: nextRows }
+      }
+    }
+  ),
+  withPropsOnChange(
+    ['loadRows'],
+    ({ loadRows }) => ({ loadRows: _.debounce(loadRows, 1000 / 16, { leading: true, trailing: false }) })
+  ),
+  withHandlers({
+    onScroll: ({ rows, loadRows }) => ({ direction, overScanIndex }) => {
+      if (direction === SCROLL_DIRECTION_UP && overScanIndex.to >= rows.length - 1) {
+        loadRows()
+      }
+    }
+  })
+)
+
+export default enhance(({ rows, onScroll }) => {
   return (
     <div className='flex flex-col h-screen'>
       <header className='p-4 flex-0 border-b-2'>Fixed header area</header>
 
       <Sized>
-        {render}
+        {({ size, setSizeRef }) => {
+          return (
+            <div
+              className='flex-1 overflow-hidden'
+              ref={setSizeRef}
+            >
+              <VirtualList
+                onScroll={onScroll}
+                height={size.height}
+                rows={rows}
+                reversed
+              >
+                {renderList}
+              </VirtualList>
+            </div>
+          )
+        }}
       </Sized>
     </div>
   )

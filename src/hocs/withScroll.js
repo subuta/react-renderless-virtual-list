@@ -17,7 +17,7 @@ export default compose(
       scrollReason: SCROLL_REASON_ON_SCROLL_EVENT
     }),
     {
-      onScroll: (state) => (scrollTop, e) => {
+      _onScroll: (state) => (scrollTop, e) => {
         if (state.scrollTop === scrollTop) return
         return {
           scrollTop,
@@ -38,7 +38,7 @@ export default compose(
     let listen = _.noop
     let scrollContainerRef = null
 
-    const onScroll = (e) => requestAnimationFrame(() => props.onScroll(scrollContainerRef.scrollTop, e))
+    const onScroll = (e) => requestAnimationFrame(() => props._onScroll(scrollContainerRef.scrollTop, e))
 
     return {
       setScrollContainerRef: () => (ref) => {

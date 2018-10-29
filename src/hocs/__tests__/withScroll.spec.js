@@ -38,12 +38,12 @@ test('should have initialProps', () => {
   expect(props.scrollReason).toBe('SCROLL_REASON_ON_SCROLL_EVENT')
 
   // Should exports handlers
-  expect(props.onScroll).toBeInstanceOf(Function)
+  expect(props._onScroll).toBeInstanceOf(Function)
   expect(props.setScrollContainerRef).toBeInstanceOf(Function)
   expect(props.requestScrollTo).toBeInstanceOf(Function)
 })
 
-test('onScroll/requestScrollTo should not re-render for same scrollTop', () => {
+test('_onScroll/requestScrollTo should not re-render for same scrollTop', () => {
   const component = sinon.spy(() => null)
   component.displayName = 'component'
 
@@ -58,14 +58,14 @@ test('onScroll/requestScrollTo should not re-render for same scrollTop', () => {
 
   let props = component.firstCall.args[0]
 
-  props.onScroll(0)
+  props._onScroll(0)
   props.requestScrollTo(0)
 
   // Should not update.
   expect(component.callCount).toBe(1)
 })
 
-test('onScroll should set scrollTop with reason', () => {
+test('_onScroll should set scrollTop with reason', () => {
   const component = sinon.spy(() => null)
   component.displayName = 'component'
 
@@ -82,7 +82,7 @@ test('onScroll should set scrollTop with reason', () => {
   expect(props.scrollTop).toBe(0)
   expect(props.scrollReason).toBe('SCROLL_REASON_ON_SCROLL_EVENT')
 
-  props.onScroll(100)
+  props._onScroll(100)
 
   // Should update.
   expect(component.callCount).toBe(2)
@@ -137,7 +137,7 @@ test('requestScrollTo should set scrollTop with reason', () => {
   expect(props.scrollReason).toBe('SCROLL_REASON_REQUESTED')
 })
 
-test('setScrollContainerRef should call onScroll once', () => {
+test('setScrollContainerRef should call _onScroll once', () => {
   const spiedRef = sinon.stub({
     scrollTop: 100,
     addEventListener: () => {},
@@ -174,7 +174,7 @@ test('setScrollContainerRef should call onScroll once', () => {
 
   expect(component.callCount).toBe(2)
 
-  // onScroll should set spiedRef's scrollTop
+  // _onScroll should set spiedRef's scrollTop
   props = component.secondCall.args[0]
 
   expect(props.scrollTop).toBe(100)

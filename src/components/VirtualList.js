@@ -17,6 +17,10 @@ import withScroll from 'src/hocs/withScroll'
 
 import VirtualListItem from './VirtualListItem'
 
+export const SCROLL_DIRECTION_UP = 'SCROLL_DIRECTION_UP'
+export const SCROLL_DIRECTION_NONE = 'SCROLL_DIRECTION_NONE'
+export const SCROLL_DIRECTION_DOWN = 'SCROLL_DIRECTION_DOWN'
+
 // Default value of props.
 const defaults = {
   renderListContainer: (props) => {
@@ -131,96 +135,112 @@ const enhance = compose(
       }
     }
   }),
-  withHandlers({
-    onMeasure: ({ setHeightCache }) => (index, size) => {
-      setHeightCache(index, size.height)
-    },
+  withHandlers(() => {
+    let lastScrollTop = 0
 
-    calculateIndexes: (props) => () => {
-      const {
-        scrollTop = 0,
-        heightCache,
-        rows,
-        height,
-        overScanCount,
-        totalHeight,
-        reversed
-      } = props
+    return {
+      onMeasure: ({ setHeightCache }) => (index, size) => {
+        setHeightCache(index, size.height)
+      },
 
-      let sum = 0
-      let visibleIndex = { from: -1, to: 0 }
+      handleScroll: (props) => () => {
+        const {
+          scrollTop = 0,
+          onScroll = _.noop,
+          heightCache,
+          rows,
+          height,
+          overScanCount,
+          totalHeight,
+          reversed
+        } = props
 
-      // Start position of rows.
-      let startOfRows = reversed ? (totalHeight - (scrollTop + height)) : 0
+        let sum = 0
+        let visibleIndex = { from: -1, to: 0 }
 
-      // End position of rows.
-      let endOfRows = reversed ? (startOfRows + height) : scrollTop + height
+        // Start position of rows.
+        let startOfRows = reversed ? (totalHeight - (scrollTop + height)) : 0
 
-      _.takeWhile(_.times(rows.length), (i) => {
-        const h = heightCache[i]
-        visibleIndex.to = i
+        // End position of rows.
+        let endOfRows = reversed ? (startOfRows + height) : scrollTop + height
 
-        if (visibleIndex.from === -1 && sum + h >= (reversed ? startOfRows : scrollTop)) {
-          visibleIndex.from = i
-          // Use current sum as start position of rows.
-          startOfRows = sum
+        _.takeWhile(_.times(rows.length), (i) => {
+          const h = heightCache[i]
+          visibleIndex.to = i
+
+          if (visibleIndex.from === -1 && sum + h >= (reversed ? startOfRows : scrollTop)) {
+            visibleIndex.from = i
+            // Use current sum as start position of rows.
+            startOfRows = sum
+          }
+
+          if (sum >= endOfRows) return false
+
+          sum += h
+
+          return true
+        })
+
+        const overScanIndex = {
+          from: visibleIndex.from - overScanCount >= 0 ? visibleIndex.from - overScanCount : 0,
+          to: visibleIndex.to + overScanCount <= rows.length - 1 ? visibleIndex.to + overScanCount : rows.length - 1
         }
 
-        if (sum >= endOfRows) return false
+        // Minus top overScan height for correct startOfRows.
+        startOfRows -= _.sum(_.slice(heightCache, overScanIndex.from, visibleIndex.from))
+        endOfRows += _.sum(_.slice(heightCache, visibleIndex.to, overScanIndex.to))
 
-        sum += h
+        const direction = lastScrollTop > scrollTop ? SCROLL_DIRECTION_UP : SCROLL_DIRECTION_DOWN
 
-        return true
-      })
+        onScroll({
+          scrollTop,
+          direction,
+          visibleIndex,
+          overScanIndex
+        })
 
-      const overScanIndex = {
-        from: visibleIndex.from - overScanCount >= 0 ? visibleIndex.from - overScanCount : 0,
-        to: visibleIndex.to + overScanCount <= rows.length - 1 ? visibleIndex.to + overScanCount : rows.length - 1
-      }
+        lastScrollTop = scrollTop
 
-      // Minus top overScan height for correct startOfRows.
-      startOfRows -= _.sum(_.slice(heightCache, overScanIndex.from, visibleIndex.from))
-      endOfRows += _.sum(_.slice(heightCache, visibleIndex.to, overScanIndex.to))
-
-      return {
-        visibleIndex,
-        overScanIndex,
-        positions: {
-          start: startOfRows,
-          end: endOfRows
+        return {
+          visibleIndex,
+          overScanIndex,
+          positions: {
+            from: startOfRows,
+            to: endOfRows
+          }
         }
-      }
-    },
+      },
 
-    getStyles: ({ totalHeight, heightCache, height }) => () => {
-      const containerStyle = {
-        height,
-        width: '100vw',
-        overflowX: 'auto',
-        willChange: 'transform'
-      }
+      getStyles: ({ totalHeight, heightCache, height }) => () => {
+        const containerStyle = {
+          height,
+          width: '100vw',
+          overflowX: 'auto',
+          willChange: 'transform'
+        }
 
-      const listStyle = {
-        position: 'relative',
-        minHeight: '100%',
-        width: '100%',
-        height: totalHeight
-      }
+        const listStyle = {
+          position: 'relative',
+          minHeight: '100%',
+          width: '100%',
+          height: totalHeight
+        }
 
-      return {
-        containerStyle,
-        listStyle
-      }
-    },
+        return {
+          containerStyle,
+          listStyle
+        }
+      },
 
-    requestScrollToBottom: ({ requestScrollTo, totalHeight }) => () => {
-      requestScrollTo(totalHeight)
+      requestScrollToBottom: ({ requestScrollTo, totalHeight }) => () => {
+        requestScrollTo(totalHeight)
+      }
     }
   }),
   withPropsOnChange(
     ['scrollTop', 'height', 'totalHeight'],
     (props) => ({
-      ...props.calculateIndexes(),
+      ...props.handleScroll(),
       ...props.getStyles()
     })
   ),
@@ -250,8 +270,8 @@ export default enhance((props) => {
     renderListContainer
   } = props
 
-  let startOfRows = _.get(props, 'positions.start')
-  const endOfRows = _.get(props, 'positions.end')
+  let startOfRows = _.get(props, 'positions.from')
+  const endOfRows = _.get(props, 'positions.to')
 
   const List = renderList
   const Container = renderListContainer
