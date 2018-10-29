@@ -7,8 +7,8 @@ import {
 } from 'recompose'
 import _ from 'lodash'
 
-const SCROLL_REASON_REQUESTED = 'SCROLL_REASON_REQUESTED'
-const SCROLL_REASON_ON_SCROLL_EVENT = 'SCROLL_REASON_ON_SCROLL_EVENT'
+export const SCROLL_REASON_REQUESTED = 'SCROLL_REASON_REQUESTED'
+export const SCROLL_REASON_ON_SCROLL_EVENT = 'SCROLL_REASON_ON_SCROLL_EVENT'
 
 export default compose(
   withStateHandlers(

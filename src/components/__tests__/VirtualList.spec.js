@@ -189,8 +189,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
     left: 0,
     minHeight: 100,
     minWidth: 100,
-    height: 200,
-    width: 200
+    height: 200
   })
 
   // simulate resize event of element.
@@ -219,8 +218,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
     left: 0,
     minHeight: 100,
     minWidth: 100,
-    height: 300,
-    width: 300
+    height: 300
   })
 })
 

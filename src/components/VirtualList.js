@@ -14,6 +14,7 @@ import {
 } from 'recompose'
 
 import withScroll from 'src/hocs/withScroll'
+
 import VirtualListItem from './VirtualListItem'
 
 // Default value of props.
@@ -101,13 +102,12 @@ const enhance = compose(
       }
     },
     {
-      mergeHeightCache: (state, { rows }) => (heightCache) => {
+      mergeHeightCache: (state) => (heightCache) => {
         const nextHeightCache = _.merge([...state.heightCache], heightCache)
-        // console.log('nextHeightCache = ', nextHeightCache)
         if (_.isEqual(state.heightCache, nextHeightCache)) return
         return {
-          heightCache: _.merge(_.fill(new Array(rows.length), defaults.rowSize.height), nextHeightCache),
-          totalHeight: _.sum(heightCache)
+          heightCache: nextHeightCache,
+          totalHeight: _.sum(nextHeightCache)
         }
       }
     }
@@ -210,6 +210,10 @@ const enhance = compose(
         listStyle
       }
     },
+
+    requestScrollToBottom: ({ requestScrollTo, totalHeight }) => () => {
+      requestScrollTo(totalHeight)
+    }
   }),
   withPropsOnChange(
     ['scrollTop', 'height', 'totalHeight'],
@@ -222,7 +226,7 @@ const enhance = compose(
     componentDidMount () {
       if (this.props.reversed) {
         // Should rendered from bottom position if reversed.
-        _.delay(() => this.props.requestScrollTo(this.props.totalHeight), 0)
+        _.delay(() => this.props.requestScrollToBottom(), 2000)
       }
     }
   })

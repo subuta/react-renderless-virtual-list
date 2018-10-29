@@ -40,7 +40,7 @@ const enhance = compose(
       minWidth: defaultRowSize.width
     }
 
-    if (size.height) {
+    if (size.height && size.width) {
       style = {
         ...style,
         height: size.height

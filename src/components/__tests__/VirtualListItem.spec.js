@@ -62,6 +62,7 @@ test('should render with style and reversed.', () => {
     <VirtualListItem
       startOfRows={0}
       size={{ height: 100, width: 100 }}
+      defaultRowSize={{ height: 100, width: 100 }}
       reversed
     >
       {child}
@@ -78,8 +79,9 @@ test('should render with style and reversed.', () => {
     position: 'absolute',
     bottom: 0,
     left: 0,
-    height: 100,
-    width: 100
+    minHeight: 100,
+    minWidth: 100,
+    height: 100
   })
 })
 
@@ -92,6 +94,7 @@ test('should render with style when size set.', () => {
       index={0}
       startOfRows={0}
       size={{ height: 100, width: 100 }}
+      defaultRowSize={{ height: 100, width: 100 }}
       onMeasure={onMeasure}
     >
       {child}
@@ -111,8 +114,9 @@ test('should render with style when size set.', () => {
     position: 'absolute',
     top: 0,
     left: 0,
-    height: 100,
-    width: 100
+    minHeight: 100,
+    minWidth: 100,
+    height: 100
   })
 
   // When size and startOfRows changed.
@@ -137,7 +141,8 @@ test('should render with style when size set.', () => {
     position: 'absolute',
     top: 100,
     left: 0,
-    height: 200,
-    width: 200
+    minHeight: 100,
+    minWidth: 100,
+    height: 200
   })
 })

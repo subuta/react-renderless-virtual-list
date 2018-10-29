@@ -43,7 +43,7 @@ const render = ({size, setSizeRef}) => {
       <VirtualList
         height={size.height}
         rows={rows}
-        // reversed
+        reversed
       >
         {renderList}
       </VirtualList>
