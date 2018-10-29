@@ -73,7 +73,7 @@ const defaults = {
     )
   },
 
-  overScanCount: 3,
+  overScanCount: 10,
 
   height: 300,
 

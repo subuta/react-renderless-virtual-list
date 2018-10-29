@@ -35,7 +35,7 @@ const renderList = ({ row, index, setSizeRef, style }) => {
 }
 
 // Initial rows count
-const ROWS_COUNT = 30
+const ROWS_COUNT = 100
 
 const createFakeRow = (index) => {
   // Fix faker seed for getting same result.
