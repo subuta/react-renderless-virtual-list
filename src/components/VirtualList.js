@@ -212,8 +212,11 @@ const enhance = compose(
         lastScrollTop = scrollTop
         lastTotalHeight = totalHeight
 
+        const hasInitialized = !reversed || isAdjusted
+        const isEdge = overScanIndex.to >= rows.length - 1
+
         // Call onScroll.
-        if (onScroll) {
+        if (onScroll && hasInitialized) {
           requestAnimationFrame(() => onScroll({
             scrollTop,
             direction,
@@ -222,7 +225,7 @@ const enhance = compose(
           }))
         }
 
-        if (onLoadMore && overScanIndex.to >= rows.length - 1) {
+        if (onLoadMore && hasInitialized && isEdge) {
           requestAnimationFrame(() => onLoadMore({
             scrollTop,
             direction,
@@ -262,9 +265,14 @@ const enhance = compose(
         }
       },
 
-      adjustScrollTop: ({ requestScrollTo, totalHeight, lastTotalHeight }) => () => {
+      adjustScrollTop: ({ requestScrollTo, requestScrollToBottom, totalHeight, lastTotalHeight }) => () => {
         const nextScrollTop = totalHeight - lastTotalHeight
-        requestScrollTo(isAdjusted ? nextScrollTop : totalHeight)
+
+        if (isAdjusted) {
+          requestScrollTo(nextScrollTop)
+        } else {
+          requestScrollToBottom()
+        }
 
         isAdjusted = true
       }
@@ -281,7 +289,7 @@ const enhance = compose(
     ['hasRendered'],
     (props) => {
       if (!props.reversed || !props.hasRendered) return
-      _.delay(() => props.adjustScrollTop(), 0)
+      props.adjustScrollTop()
     }
   )
 )

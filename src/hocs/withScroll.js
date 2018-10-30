@@ -8,6 +8,7 @@ import {
 import _ from 'lodash'
 
 export const SCROLL_REASON_REQUESTED = 'SCROLL_REASON_REQUESTED'
+export const SCROLL_REASON_TO_BOTTOM_REQUESTED = 'SCROLL_REASON_TO_BOTTOM_REQUESTED'
 export const SCROLL_REASON_ON_SCROLL_EVENT = 'SCROLL_REASON_ON_SCROLL_EVENT'
 
 export default compose(
@@ -30,6 +31,12 @@ export default compose(
         return {
           scrollTop,
           scrollReason: SCROLL_REASON_REQUESTED
+        }
+      },
+
+      requestScrollToBottom: () => () => {
+        return {
+          scrollReason: SCROLL_REASON_TO_BOTTOM_REQUESTED
         }
       }
     }
@@ -58,6 +65,10 @@ export default compose(
         scrollContainerRef.scrollTop = scrollTop
       },
 
+      scrollToBottom: () => () => {
+        scrollContainerRef.scrollTop = scrollContainerRef.scrollHeight
+      },
+
       listen: () => listen
     }
   }),
@@ -66,6 +77,8 @@ export default compose(
     (props) => {
       if (props.scrollReason === SCROLL_REASON_REQUESTED) {
         props.scrollTo(props.scrollTop)
+      } else if (props.scrollReason === SCROLL_REASON_TO_BOTTOM_REQUESTED) {
+        props.scrollToBottom()
       }
     }
   ),
