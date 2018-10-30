@@ -101,8 +101,7 @@ const enhance = compose(
       const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
       return {
         heightCache: fill,
-        totalHeight: _.sum(fill),
-        hasRendered: false
+        totalHeight: _.sum(fill)
       }
     },
     {
@@ -111,25 +110,15 @@ const enhance = compose(
         if (_.isEqual(state.heightCache, nextHeightCache)) return
         return {
           heightCache: nextHeightCache,
-          totalHeight: _.sum(nextHeightCache),
-          hasRendered: true // Mark as initial rendered.
+          totalHeight: _.sum(nextHeightCache)
         }
       },
 
       rememberTotalHeight: () => (totalHeight) => {
         return {
-          hasRendered: false,
           lastTotalHeight: totalHeight
         }
       }
-    }
-  ),
-  withPropsOnChange(
-    ['rows'],
-    ({ rows, heightCache, totalHeight, mergeHeightCache, rememberTotalHeight }) => {
-      const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
-      mergeHeightCache(_.merge(fill, heightCache))
-      rememberTotalHeight(totalHeight)
     }
   ),
   withScroll,
@@ -151,7 +140,6 @@ const enhance = compose(
   }),
   withHandlers(() => {
     let lastScrollTop = -1
-    let lastTotalHeight = 0
     let isAdjusted = false
 
     return {
@@ -210,7 +198,6 @@ const enhance = compose(
         const direction = lastScrollTop > scrollTop ? SCROLL_DIRECTION_UP : SCROLL_DIRECTION_DOWN
 
         lastScrollTop = scrollTop
-        lastTotalHeight = totalHeight
 
         const hasInitialized = !reversed || isAdjusted
         const isEdge = overScanIndex.to >= rows.length - 1
@@ -265,11 +252,18 @@ const enhance = compose(
         }
       },
 
-      adjustScrollTop: ({ requestScrollTo, requestScrollToBottom, totalHeight, lastTotalHeight }) => () => {
+      adjustScrollTop: (props) => () => {
+        const {
+          requestScrollTo,
+          requestScrollToBottom,
+          totalHeight,
+          lastTotalHeight
+        } = props
+
         const nextScrollTop = totalHeight - lastTotalHeight
 
         if (isAdjusted) {
-          requestScrollTo(nextScrollTop)
+          requestScrollTo(nextScrollTop > 0 ? nextScrollTop : totalHeight)
         } else {
           requestScrollToBottom()
         }
@@ -286,10 +280,12 @@ const enhance = compose(
     })
   ),
   withPropsOnChange(
-    ['hasRendered'],
-    (props) => {
-      if (!props.reversed || !props.hasRendered) return
-      props.adjustScrollTop()
+    ['rows'],
+    ({ rows, heightCache, totalHeight, mergeHeightCache, rememberTotalHeight, lastTotalHeight, adjustScrollTop }) => {
+      const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
+      mergeHeightCache(_.merge(fill, heightCache))
+      rememberTotalHeight(totalHeight)
+      adjustScrollTop()
     }
   )
 )

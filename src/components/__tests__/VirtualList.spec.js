@@ -15,6 +15,7 @@ const mockedObserve = jest.fn()
 const mockedUnobserve = jest.fn()
 
 const mockedRequestScrollTo = jest.fn()
+const mockedRequestScrollToBottom = jest.fn()
 
 // Mock withScroll while testing.
 jest.mock('src/hocs/withScroll', () => {
@@ -23,6 +24,7 @@ jest.mock('src/hocs/withScroll', () => {
       <Component
         {...props}
         requestScrollTo={mockedRequestScrollTo}
+        requestScrollToBottom={mockedRequestScrollToBottom}
       />
     )
   })
@@ -41,6 +43,7 @@ jest.mock('resize-observer-polyfill', () => {
 beforeEach(() => {
   clock = sinon.useFakeTimers()
   mockedRequestScrollTo.mockClear()
+  mockedRequestScrollToBottom.mockClear()
   ResizeObserver.mockClear()
   mockedObserve.mockClear()
   mockedUnobserve.mockClear()
@@ -383,6 +386,8 @@ test('should render with reversed 30 rows.', () => {
       {child}
     </VirtualList>
   )
+
+  expect(mockedRequestScrollToBottom).toHaveBeenCalled();
 
   expect(renderListContainer.callCount).toBe(2)
 
