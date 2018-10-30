@@ -281,11 +281,24 @@ const enhance = compose(
   ),
   withPropsOnChange(
     ['rows'],
-    ({ rows, heightCache, totalHeight, mergeHeightCache, rememberTotalHeight, lastTotalHeight, adjustScrollTop }) => {
+    (props) => {
+      const {
+        rows,
+        heightCache,
+        totalHeight,
+        mergeHeightCache,
+        rememberTotalHeight,
+        adjustScrollTop,
+        reversed
+      } = props
+
       const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
       mergeHeightCache(_.merge(fill, heightCache))
-      rememberTotalHeight(totalHeight)
-      adjustScrollTop()
+
+      if (reversed) {
+        rememberTotalHeight(totalHeight)
+        adjustScrollTop()
+      }
     }
   )
 )

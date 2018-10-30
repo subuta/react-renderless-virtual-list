@@ -245,8 +245,8 @@ test('should render child as pure.', () => {
     </VirtualList>
   )
 
-  expect(renderListContainer.callCount).toBe(2)
-  expect(renderList.callCount).toBe(2)
+  expect(renderListContainer.callCount).toBe(1)
+  expect(renderList.callCount).toBe(1)
   expect(child.callCount).toBe(1)
 
   const props = child.firstCall.args[0]
@@ -258,8 +258,8 @@ test('should render child as pure.', () => {
   // Should not re-render if props not changed.
   wrapper.setProps(initialProps)
 
-  expect(renderListContainer.callCount).toBe(2)
-  expect(renderList.callCount).toBe(2)
+  expect(renderListContainer.callCount).toBe(1)
+  expect(renderList.callCount).toBe(1)
   expect(child.callCount).toBe(1)
 
   // TODO: should memoize render child.
@@ -269,8 +269,8 @@ test('should render child as pure.', () => {
     scrollTop: 100
   })
 
-  expect(renderListContainer.callCount).toBe(3)
-  expect(renderList.callCount).toBe(3)
+  expect(renderListContainer.callCount).toBe(2)
+  expect(renderList.callCount).toBe(2)
   expect(child.callCount).toBe(1)
 })
 
@@ -300,7 +300,7 @@ test('should render with 30 rows.', () => {
     </VirtualList>
   )
 
-  expect(renderListContainer.callCount).toBe(2)
+  expect(renderListContainer.callCount).toBe(1)
 
   const listContainerProps = renderListContainer.firstCall.args[0]
   expect(listContainerProps.style).toEqual({
@@ -311,7 +311,7 @@ test('should render with 30 rows.', () => {
   })
 
   // Should render list.
-  expect(renderList.callCount).toBe(2)
+  expect(renderList.callCount).toBe(1)
 
   const listProps = renderList.firstCall.args[0]
   expect(listProps.style).toEqual({
