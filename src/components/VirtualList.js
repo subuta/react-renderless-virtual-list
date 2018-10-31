@@ -51,6 +51,7 @@ const defaults = {
     const {
       // Will be used as height before render row.
       rowSize,
+      size,
       onMeasure,
       reversed,
       row,
@@ -64,6 +65,7 @@ const defaults = {
         row={row}
         index={index}
         onMeasure={onMeasure}
+        size={size}
         defaultRowSize={rowSize}
         reversed={reversed}
         startOfRows={startOfRows}
@@ -97,7 +99,7 @@ const enhance = compose(
   withPropsOnChange(
     ['renderListItem'],
     ({ renderListItem }) => ({
-      renderListItem: _.memoize(renderListItem, ({ index, startOfRows }) => `row-${index}-${startOfRows}`)
+      renderListItem: _.memoize(renderListItem, ({ index, startOfRows, size }) => `row-${index}-${startOfRows}-${size.height}`)
     })
   ),
   withProps(({ height }) => {
@@ -145,9 +147,11 @@ const enhance = compose(
   withHandlers(() => {
     let lastScrollTop = -1
     let isAdjusted = false
+    let sizeCache = []
 
     return {
       onMeasure: ({ setHeightCache }) => (index, size) => {
+        sizeCache[index] = size
         setHeightCache(index, size.height)
       },
 
@@ -234,6 +238,8 @@ const enhance = compose(
           }
         }
       },
+
+      getSizeCache: () => () => sizeCache,
 
       getStyles: ({ totalHeight, heightCache, height }) => () => {
         const containerStyle = {
@@ -330,7 +336,8 @@ export default enhance((props) => {
     renderList,
     setScrollContainerRef,
     renderListItem,
-    renderListContainer
+    renderListContainer,
+    getSizeCache
   } = props
 
   let startOfRows = _.get(props, 'positions.from')
@@ -338,6 +345,7 @@ export default enhance((props) => {
 
   const List = renderList
   const Container = renderListContainer
+  const sizeCache = getSizeCache()
 
   return (
     <Container
@@ -350,7 +358,15 @@ export default enhance((props) => {
           if (index < overScanIndex.from || index > overScanIndex.to) return null
           if (startOfRows > endOfRows) return null
 
-          const component = renderListItem({ ...props, row, index, startOfRows })
+          const size = sizeCache[index] || props.rowSize
+
+          const component = renderListItem({
+            ...props,
+            row,
+            index,
+            size,
+            startOfRows
+          })
 
           startOfRows += heightCache[index]
 
