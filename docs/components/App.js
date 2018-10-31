@@ -16,7 +16,7 @@ import {
   withPropsOnChange
 } from 'recompose'
 
-const renderList = ({ row, index, setSizeRef, style }) => {
+const renderRow = ({ row, index, setSizeRef, style }) => {
   return (
     <div
       className={`row-${row.id}`}
@@ -87,7 +87,7 @@ export default enhance(({ rows, onScroll, onLoadMore }) => {
                 rows={rows}
                 reversed
               >
-                {renderList}
+                {renderRow}
               </VirtualList>
             </div>
           )

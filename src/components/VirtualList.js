@@ -66,14 +66,14 @@ const defaults = {
         onMeasure={onMeasure}
         defaultRowSize={rowSize}
         reversed={reversed}
-        // For renderProps.
-        children={props.children}
         startOfRows={startOfRows}
-      />
+      >
+        {props.children}
+      </VirtualListItem>
     )
   },
 
-  overScanCount: 10,
+  overScanCount: 6,
 
   height: 300,
 
@@ -87,9 +87,19 @@ const enhance = compose(
   pure,
   // Specify defaults
   defaultProps(defaults),
-  withProps(({ renderList, renderListContainer, renderListItem }) => ({
-    renderListItem: _.memoize(renderListItem, ({ index, startOfRows }) => `row-${index}-${startOfRows}`)
-  })),
+  withPropsOnChange(
+    ['onLoadMore', 'onScroll'],
+    ({ onLoadMore, onScroll }) => ({
+      onScroll: _.debounce(onScroll || _.noop, 300, { leading: true, trailing: false }),
+      onLoadMore: _.debounce(onLoadMore || _.noop, 300, { leading: true, trailing: false })
+    })
+  ),
+  withPropsOnChange(
+    ['renderListItem'],
+    ({ renderListItem }) => ({
+      renderListItem: _.memoize(renderListItem, ({ index, startOfRows }) => `row-${index}-${startOfRows}`)
+    })
+  ),
   withProps(({ height }) => {
     if (height === 0) return { height: defaults.height }
     return {
@@ -111,12 +121,6 @@ const enhance = compose(
         return {
           heightCache: nextHeightCache,
           totalHeight: _.sum(nextHeightCache)
-        }
-      },
-
-      rememberTotalHeight: () => (totalHeight) => {
-        return {
-          lastTotalHeight: totalHeight
         }
       }
     }
@@ -204,21 +208,21 @@ const enhance = compose(
 
         // Call onScroll.
         if (onScroll && hasInitialized) {
-          requestAnimationFrame(() => onScroll({
+          onScroll({
             scrollTop,
             direction,
             visibleIndex,
             overScanIndex
-          }))
+          })
         }
 
         if (onLoadMore && hasInitialized && isEdge) {
-          requestAnimationFrame(() => onLoadMore({
+          onLoadMore({
             scrollTop,
             direction,
             visibleIndex,
             overScanIndex
-          }))
+          })
         }
 
         return {
@@ -252,18 +256,15 @@ const enhance = compose(
         }
       },
 
-      adjustScrollTop: (props) => () => {
+      adjustScrollTop: (props) => (lastTotalHeight) => {
         const {
           requestScrollTo,
           requestScrollToBottom,
-          totalHeight,
-          lastTotalHeight
+          totalHeight
         } = props
 
-        const nextScrollTop = totalHeight - lastTotalHeight
-
         if (isAdjusted) {
-          requestScrollTo(nextScrollTop > 0 ? nextScrollTop : totalHeight)
+          requestScrollTo(totalHeight - lastTotalHeight)
         } else {
           requestScrollToBottom()
         }
@@ -285,22 +286,34 @@ const enhance = compose(
       const {
         rows,
         heightCache,
-        totalHeight,
-        mergeHeightCache,
-        rememberTotalHeight,
-        adjustScrollTop,
-        reversed
+        mergeHeightCache
       } = props
 
       const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
       mergeHeightCache(_.merge(fill, heightCache))
+    }
+  ),
+  lifecycle({
+    componentDidMount () {
+      if (this.props.reversed) {
+        this.props.adjustScrollTop()
+      }
+    },
 
-      if (reversed) {
-        rememberTotalHeight(totalHeight)
-        adjustScrollTop()
+    getSnapshotBeforeUpdate (prevProps) {
+      if (!_.isEqual(prevProps.rows, this.props.rows)) {
+        return prevProps.totalHeight
+      }
+      return null
+    },
+
+    componentDidUpdate (prevProps, prevState, totalHeight) {
+      if (!this.props.reversed) return
+      if (totalHeight !== null) {
+        requestAnimationFrame(() => this.props.adjustScrollTop(totalHeight))
       }
     }
-  )
+  })
 )
 
 export default enhance((props) => {
