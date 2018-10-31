@@ -99,7 +99,7 @@ const enhance = compose(
   withPropsOnChange(
     ['renderListItem'],
     ({ renderListItem }) => ({
-      renderListItem: _.memoize(renderListItem, ({ index, startOfRows, size }) => `row-${index}-${startOfRows}-${size.height}`)
+      renderListItem: _.memoize(renderListItem, ({ index, startOfRows, size }) => `row-${index}-${startOfRows}${size.height ? `-${size.height}` : ''}`)
     })
   ),
   withProps(({ height }) => {
@@ -358,7 +358,7 @@ export default enhance((props) => {
           if (index < overScanIndex.from || index > overScanIndex.to) return null
           if (startOfRows > endOfRows) return null
 
-          const size = sizeCache[index] || props.rowSize
+          const size = sizeCache[index] || {}
 
           const component = renderListItem({
             ...props,
