@@ -180,7 +180,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
   clock.runAll()
 
   // FIXME: Reduce extra call(may be memoize by size.height + index + startOfRows)
-  expect(child.callCount).toBe(3)
+  expect(child.callCount).toBe(2)
 
   props = child.secondCall.args[0]
 
@@ -207,7 +207,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
 
   clock.runAll()
 
-  expect(child.callCount).toBe(5)
+  expect(child.callCount).toBe(3)
 
   props = child.getCall(2).args[0]
 
@@ -215,7 +215,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
     position: 'absolute',
     top: 0,
     left: 0,
-    height: 200
+    height: 300
   })
 })
 

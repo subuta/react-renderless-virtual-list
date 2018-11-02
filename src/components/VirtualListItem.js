@@ -6,7 +6,8 @@ import {
   toRenderProps,
   pure,
   withProps,
-  withPropsOnChange
+  withPropsOnChange,
+  shouldUpdate
 } from 'recompose'
 
 import withSize from 'src/hocs/withSize'
@@ -51,6 +52,13 @@ const enhance = compose(
     }
 
     return { row, index, setSizeRef, style }
+  }),
+  shouldUpdate((props, nextProps) => {
+    const isSizeChanged = !_.isEqual(props.size, nextProps.size)
+    const isRowChanged = !_.isEqual(props.row, nextProps.row)
+    const isStyleChanged = !_.isEqual(props.style, nextProps.style)
+
+    return isRowChanged || isStyleChanged || isSizeChanged
   })
 )
 
