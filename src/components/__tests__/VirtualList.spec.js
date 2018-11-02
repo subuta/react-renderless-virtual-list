@@ -180,7 +180,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
   clock.runAll()
 
   // FIXME: Reduce extra call(may be memoize by size.height + index + startOfRows)
-  expect(child.callCount).toBe(2)
+  expect(child.callCount).toBe(3)
 
   props = child.secondCall.args[0]
 
@@ -207,7 +207,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
 
   clock.runAll()
 
-  expect(child.callCount).toBe(3)
+  expect(child.callCount).toBe(5)
 
   props = child.getCall(2).args[0]
 
@@ -215,7 +215,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
     position: 'absolute',
     top: 0,
     left: 0,
-    height: 300
+    height: 200
   })
 })
 
@@ -321,12 +321,12 @@ test('should render with 30 rows.', () => {
   })
 
   // Should render only-visible child rows.
-  expect(child.callCount).toBe(6)
+  expect(child.callCount).toBe(8)
 
   clock.runAll()
 
   // Should not-render after setDebouncedHeightCache.
-  expect(child.callCount).toBe(6)
+  expect(child.callCount).toBe(8)
 
   const childProps = child.firstCall.args[0]
 
@@ -342,12 +342,12 @@ test('should render with 30 rows.', () => {
 
   const lastCallChildProps = child.lastCall.args[0]
 
-  expect(lastCallChildProps.row).toEqual({ id: 6 })
-  expect(lastCallChildProps.index).toEqual(5)
+  expect(lastCallChildProps.row).toEqual({ id: 8 })
+  expect(lastCallChildProps.index).toEqual(7)
   expect(lastCallChildProps.setSizeRef).toBeInstanceOf(Function)
   expect(lastCallChildProps.style).toEqual({
     position: 'absolute',
-    top: 500,
+    top: 700,
     left: 0,
     minHeight: 100
   })
@@ -410,21 +410,21 @@ test('should render with reversed 30 rows.', () => {
   })
 
   // Should render only-visible child rows.
-  expect(child.callCount).toBe(6)
+  expect(child.callCount).toBe(8)
 
   clock.runAll()
 
   // Should not-render after setDebouncedHeightCache.
-  expect(child.callCount).toBe(6)
+  expect(child.callCount).toBe(8)
 
   const childProps = child.firstCall.args[0]
 
-  expect(childProps.row).toEqual({ id: 25 })
-  expect(childProps.index).toEqual(24)
+  expect(childProps.row).toEqual({ id: 23 })
+  expect(childProps.index).toEqual(22)
   expect(childProps.setSizeRef).toBeInstanceOf(Function)
   expect(childProps.style).toEqual({
     position: 'absolute',
-    bottom: 2400,
+    bottom: 2200,
     left: 0,
     minHeight: 100
   })
