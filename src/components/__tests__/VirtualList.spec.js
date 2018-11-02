@@ -180,7 +180,7 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
   clock.runAll()
 
   // FIXME: Reduce extra call(may be memoize by size.height + index + startOfRows)
-  expect(child.callCount).toBe(3)
+  expect(child.callCount).toBe(2)
 
   props = child.secondCall.args[0]
 
@@ -207,9 +207,9 @@ test('should re-render at onMeasure call at VirtualListItem', () => {
 
   clock.runAll()
 
-  expect(child.callCount).toBe(5)
+  expect(child.callCount).toBe(3)
 
-  props = child.getCall(4).args[0]
+  props = child.getCall(2).args[0]
 
   expect(props.style).toEqual({
     position: 'absolute',
@@ -268,8 +268,8 @@ test('should render child as pure.', () => {
     scrollTop: 100
   })
 
-  expect(renderListContainer.callCount).toBe(2)
-  expect(renderList.callCount).toBe(2)
+  expect(renderListContainer.callCount).toBe(1)
+  expect(renderList.callCount).toBe(1)
   expect(child.callCount).toBe(1)
 })
 
@@ -321,12 +321,12 @@ test('should render with 30 rows.', () => {
   })
 
   // Should render only-visible child rows.
-  expect(child.callCount).toBe(10)
+  expect(child.callCount).toBe(6)
 
   clock.runAll()
 
   // Should not-render after setDebouncedHeightCache.
-  expect(child.callCount).toBe(10)
+  expect(child.callCount).toBe(6)
 
   const childProps = child.firstCall.args[0]
 
@@ -342,12 +342,12 @@ test('should render with 30 rows.', () => {
 
   const lastCallChildProps = child.lastCall.args[0]
 
-  expect(lastCallChildProps.row).toEqual({ id: 10 })
-  expect(lastCallChildProps.index).toEqual(9)
+  expect(lastCallChildProps.row).toEqual({ id: 6 })
+  expect(lastCallChildProps.index).toEqual(5)
   expect(lastCallChildProps.setSizeRef).toBeInstanceOf(Function)
   expect(lastCallChildProps.style).toEqual({
     position: 'absolute',
-    top: 900,
+    top: 500,
     left: 0,
     minHeight: 100
   })
@@ -410,21 +410,21 @@ test('should render with reversed 30 rows.', () => {
   })
 
   // Should render only-visible child rows.
-  expect(child.callCount).toBe(10)
+  expect(child.callCount).toBe(6)
 
   clock.runAll()
 
   // Should not-render after setDebouncedHeightCache.
-  expect(child.callCount).toBe(10)
+  expect(child.callCount).toBe(6)
 
   const childProps = child.firstCall.args[0]
 
-  expect(childProps.row).toEqual({ id: 21 })
-  expect(childProps.index).toEqual(20)
+  expect(childProps.row).toEqual({ id: 25 })
+  expect(childProps.index).toEqual(24)
   expect(childProps.setSizeRef).toBeInstanceOf(Function)
   expect(childProps.style).toEqual({
     position: 'absolute',
-    bottom: 2000,
+    bottom: 2400,
     left: 0,
     minHeight: 100
   })

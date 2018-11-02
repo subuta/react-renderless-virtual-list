@@ -76,7 +76,7 @@ const defaults = {
     )
   },
 
-  overScanCount: 10,
+  overScanCount: 2,
 
   height: 300,
 
@@ -322,7 +322,10 @@ const enhance = compose(
     }
   }),
   shouldUpdate((props, nextProps) => {
-    return !_.isEqual(props.overScanIndex, nextProps.overScanIndex)
+    const isOverScanIndexChanged = !_.isEqual(props.overScanIndex, nextProps.overScanIndex)
+    const isHeightChanged = !_.isEqual(props.height, nextProps.height)
+
+    return isOverScanIndexChanged || isHeightChanged
   })
 )
 

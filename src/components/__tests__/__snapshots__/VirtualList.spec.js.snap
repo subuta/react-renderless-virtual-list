@@ -139,58 +139,6 @@ exports[`should render with 30 rows. 1`] = `
     >
       6
     </span>
-    <span
-      className="row-7"
-      style={
-        Object {
-          "left": 0,
-          "minHeight": 100,
-          "position": "absolute",
-          "top": 600,
-        }
-      }
-    >
-      7
-    </span>
-    <span
-      className="row-8"
-      style={
-        Object {
-          "left": 0,
-          "minHeight": 100,
-          "position": "absolute",
-          "top": 700,
-        }
-      }
-    >
-      8
-    </span>
-    <span
-      className="row-9"
-      style={
-        Object {
-          "left": 0,
-          "minHeight": 100,
-          "position": "absolute",
-          "top": 800,
-        }
-      }
-    >
-      9
-    </span>
-    <span
-      className="row-10"
-      style={
-        Object {
-          "left": 0,
-          "minHeight": 100,
-          "position": "absolute",
-          "top": 900,
-        }
-      }
-    >
-      10
-    </span>
   </div>
 </div>
 `;
@@ -238,58 +186,6 @@ exports[`should render with height as px 1`] = `
 exports[`should render with reversed 30 rows. 1`] = `
 <div>
   <div>
-    <span
-      className="row-21"
-      style={
-        Object {
-          "bottom": 2000,
-          "left": 0,
-          "minHeight": 100,
-          "position": "absolute",
-        }
-      }
-    >
-      21
-    </span>
-    <span
-      className="row-22"
-      style={
-        Object {
-          "bottom": 2100,
-          "left": 0,
-          "minHeight": 100,
-          "position": "absolute",
-        }
-      }
-    >
-      22
-    </span>
-    <span
-      className="row-23"
-      style={
-        Object {
-          "bottom": 2200,
-          "left": 0,
-          "minHeight": 100,
-          "position": "absolute",
-        }
-      }
-    >
-      23
-    </span>
-    <span
-      className="row-24"
-      style={
-        Object {
-          "bottom": 2300,
-          "left": 0,
-          "minHeight": 100,
-          "position": "absolute",
-        }
-      }
-    >
-      24
-    </span>
     <span
       className="row-25"
       style={
