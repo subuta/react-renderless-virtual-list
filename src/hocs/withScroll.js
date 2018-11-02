@@ -44,8 +44,22 @@ export default compose(
   withHandlers((props) => {
     let listen = _.noop
     let scrollContainerRef = null
+    let lastScrollTop = null
 
-    const onScroll = (e) => requestAnimationFrame(() => props._onScroll(scrollContainerRef.scrollTop, e))
+    let isTicking = false
+
+    const onScroll = (e) => {
+      lastScrollTop = scrollContainerRef.scrollTop
+
+      if (!isTicking) {
+        requestAnimationFrame(() => {
+          props._onScroll(scrollContainerRef.scrollTop, e)
+          isTicking = false
+        })
+
+        isTicking = true
+      }
+    }
 
     return {
       setScrollContainerRef: () => (ref) => {

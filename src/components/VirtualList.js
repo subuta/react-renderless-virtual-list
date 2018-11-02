@@ -10,6 +10,7 @@ import {
   withProps,
   defaultProps,
   lifecycle,
+  shouldUpdate,
   pure
 } from 'recompose'
 
@@ -75,7 +76,7 @@ const defaults = {
     )
   },
 
-  overScanCount: 6,
+  overScanCount: 10,
 
   height: 300,
 
@@ -319,6 +320,9 @@ const enhance = compose(
         requestAnimationFrame(() => this.props.adjustScrollTop(totalHeight))
       }
     }
+  }),
+  shouldUpdate((props, nextProps) => {
+    return !_.isEqual(props.overScanIndex, nextProps.overScanIndex)
   })
 )
 
