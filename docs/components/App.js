@@ -59,7 +59,7 @@ const enhance = compose(
   ),
   withPropsOnChange(
     ['loadRows'],
-    ({ loadRows }) => ({ loadRows: _.debounce(loadRows, 1000 / 16, { leading: true, trailing: false }) })
+    ({ loadRows }) => ({ loadRows: _.debounce(loadRows, 1000 / 60, { leading: true, trailing: false }) })
   ),
   withHandlers({
     onLoadMore: ({ loadRows }) => () => {
@@ -85,6 +85,14 @@ export default enhance(({ rows, onScroll, onLoadMore }) => {
                 onScroll={onScroll}
                 height={size.height}
                 rows={rows}
+                groupBy={({ row }) => {
+                  return Math.floor(row.id / 100)
+                }}
+                renderGroupHeader={({ groupHeader }) => {
+                  return (
+                    <div key={`header-${groupHeader}`} className={`header-${groupHeader} sticky pin-t`}>{groupHeader}</div>
+                  )
+                }}
                 reversed
               >
                 {renderRow}

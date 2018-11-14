@@ -351,6 +351,8 @@ export default enhance((props) => {
       to: rows.length - 1
     },
     heightCache = [],
+    groupBy,
+    renderGroupHeader,
     renderList,
     setScrollContainerRef,
     renderListItem,
@@ -365,31 +367,45 @@ export default enhance((props) => {
   const Container = renderListContainer
   const sizeCache = getSizeCache()
 
+  let lastGroupHeader = null
+  const listItems = []
+
+  _.each(rows, (row, index) => {
+    // No-render if index out of range.
+    if (index < overScanIndex.from || index > overScanIndex.to) return null
+    if (startOfRows > endOfRows) return null
+
+    let nextGroupHeader = null
+    if (groupBy) {
+      nextGroupHeader = groupBy({ row, index })
+    }
+
+    const size = sizeCache[index] || {}
+
+    const component = renderListItem({
+      ...props,
+      row,
+      index,
+      size,
+      startOfRows
+    })
+
+    if (renderGroupHeader && nextGroupHeader !== lastGroupHeader) {
+      listItems.push(renderGroupHeader({ groupHeader: nextGroupHeader }))
+    }
+    lastGroupHeader = nextGroupHeader
+
+    startOfRows += heightCache[index]
+    listItems.push(component)
+  })
+
   return (
     <Container
       style={containerStyle}
       setScrollContainerRef={setScrollContainerRef}
     >
       <List style={listStyle}>
-        {_.map(rows, (row, index) => {
-          // No-render if index out of range.
-          if (index < overScanIndex.from || index > overScanIndex.to) return null
-          if (startOfRows > endOfRows) return null
-
-          const size = sizeCache[index] || {}
-
-          const component = renderListItem({
-            ...props,
-            row,
-            index,
-            size,
-            startOfRows
-          })
-
-          startOfRows += heightCache[index]
-
-          return component
-        })}
+        {listItems}
       </List>
     </Container>
   )
