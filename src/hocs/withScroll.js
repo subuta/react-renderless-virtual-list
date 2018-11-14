@@ -15,7 +15,7 @@ export default compose(
   withStateHandlers(
     () => ({
       scrollTop: 0,
-      scrollReason: SCROLL_REASON_ON_SCROLL_EVENT
+      scrollReason: null
     }),
     {
       _onScroll: (state) => (scrollTop, e) => {
@@ -65,12 +65,11 @@ export default compose(
       setScrollContainerRef: () => (ref) => {
         scrollContainerRef = ref
 
+        window.scrollContainerRef = scrollContainerRef
+
         if (!scrollContainerRef) return
         listen = () => {
           scrollContainerRef.addEventListener('scroll', onScroll, { passive: true })
-
-          onScroll({})
-
           return () => scrollContainerRef.removeEventListener('scroll', onScroll)
         }
       },
@@ -81,6 +80,10 @@ export default compose(
 
       scrollToBottom: () => () => {
         scrollContainerRef.scrollTop = scrollContainerRef.scrollHeight
+      },
+
+      hasScrolledToBottom: () => () => {
+        return scrollContainerRef.scrollTop === scrollContainerRef.scrollHeight - scrollContainerRef.clientHeight
       },
 
       listen: () => listen

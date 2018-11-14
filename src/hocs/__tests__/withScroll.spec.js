@@ -35,7 +35,7 @@ test('should have initialProps', () => {
 
   // Should exports props
   expect(props.scrollTop).toBe(0)
-  expect(props.scrollReason).toBe('SCROLL_REASON_ON_SCROLL_EVENT')
+  expect(props.scrollReason).toBe(null)
 
   // Should exports handlers
   expect(props._onScroll).toBeInstanceOf(Function)
@@ -80,7 +80,7 @@ test('_onScroll should set scrollTop with reason', () => {
 
   let props = component.firstCall.args[0]
   expect(props.scrollTop).toBe(0)
-  expect(props.scrollReason).toBe('SCROLL_REASON_ON_SCROLL_EVENT')
+  expect(props.scrollReason).toBe(null)
 
   props._onScroll(100)
 
@@ -117,7 +117,7 @@ test('requestScrollTo should set scrollTop with reason', () => {
 
   let props = component.firstCall.args[0]
   expect(props.scrollTop).toBe(0)
-  expect(props.scrollReason).toBe('SCROLL_REASON_ON_SCROLL_EVENT')
+  expect(props.scrollReason).toBe(null)
 
   // Should not changed.
   expect(spiedRef.scrollTop).toBe(100)
@@ -139,7 +139,7 @@ test('requestScrollTo should set scrollTop with reason', () => {
   expect(props.scrollReason).toBe('SCROLL_REASON_REQUESTED')
 })
 
-test('setScrollContainerRef should call _onScroll once', () => {
+test('setScrollContainerRef should bind onScroll event', () => {
   const spiedRef = sinon.stub({
     scrollTop: 100,
     addEventListener: () => {},
@@ -167,20 +167,12 @@ test('setScrollContainerRef should call _onScroll once', () => {
   let props = component.firstCall.args[0]
 
   expect(props.scrollTop).toBe(0)
-  expect(props.scrollReason).toBe('SCROLL_REASON_ON_SCROLL_EVENT')
+  expect(props.scrollReason).toBe(null)
 
   expect(spiedRef.addEventListener.calledOnce).toBe(true)
 
   // Wait for raf.
   clock.next()
-
-  expect(component.callCount).toBe(2)
-
-  // _onScroll should set spiedRef's scrollTop
-  props = component.secondCall.args[0]
-
-  expect(props.scrollTop).toBe(100)
-  expect(props.scrollReason).toBe('SCROLL_REASON_ON_SCROLL_EVENT')
 
   wrapper.unmount()
   expect(spiedRef.removeEventListener.calledOnce).toBe(true)

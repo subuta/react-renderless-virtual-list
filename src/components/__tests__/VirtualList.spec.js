@@ -16,6 +16,7 @@ const mockedUnobserve = jest.fn()
 
 const mockedRequestScrollTo = jest.fn()
 const mockedRequestScrollToBottom = jest.fn()
+const mockedHasScrolledToBottom = jest.fn()
 
 // Mock withScroll while testing.
 jest.mock('src/hocs/withScroll', () => {
@@ -25,6 +26,7 @@ jest.mock('src/hocs/withScroll', () => {
         {...props}
         requestScrollTo={mockedRequestScrollTo}
         requestScrollToBottom={mockedRequestScrollToBottom}
+        hasScrolledToBottom={mockedHasScrolledToBottom}
       />
     )
   })
@@ -44,6 +46,7 @@ beforeEach(() => {
   clock = sinon.useFakeTimers()
   mockedRequestScrollTo.mockClear()
   mockedRequestScrollToBottom.mockClear()
+  mockedHasScrolledToBottom.mockClear()
   ResizeObserver.mockClear()
   mockedObserve.mockClear()
   mockedUnobserve.mockClear()

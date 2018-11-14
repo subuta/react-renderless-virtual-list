@@ -242,6 +242,8 @@ const enhance = compose(
 
       getSizeCache: () => () => sizeCache,
 
+      getIsAdjusted: () => () => isAdjusted,
+
       getStyles: ({ totalHeight, heightCache, height }) => () => {
         const containerStyle = {
           height,
@@ -263,20 +265,21 @@ const enhance = compose(
         }
       },
 
-      adjustScrollTop: (props) => (lastTotalHeight) => {
+      adjustScrollTop: (props) => (scrollTop) => {
         const {
           requestScrollTo,
           requestScrollToBottom,
-          totalHeight
+          hasScrolledToBottom
         } = props
 
         if (isAdjusted) {
-          requestScrollTo(totalHeight - lastTotalHeight)
+          requestScrollTo(scrollTop)
         } else {
           requestScrollToBottom()
+          requestAnimationFrame(() => {
+            isAdjusted = hasScrolledToBottom()
+          })
         }
-
-        isAdjusted = true
       }
     }
   }),
@@ -309,15 +312,22 @@ const enhance = compose(
 
     getSnapshotBeforeUpdate (prevProps) {
       if (!_.isEqual(prevProps.rows, this.props.rows)) {
-        return prevProps.totalHeight
+        return prevProps.scrollTop
       }
+
+      if (prevProps.totalHeight !== this.props.totalHeight) {
+        const diff = this.props.totalHeight - prevProps.totalHeight
+        return this.props.scrollTop + diff
+      }
+
       return null
     },
 
-    componentDidUpdate (prevProps, prevState, totalHeight) {
+    componentDidUpdate (prevProps, prevState, scrollTop) {
       if (!this.props.reversed) return
-      if (totalHeight !== null) {
-        requestAnimationFrame(() => this.props.adjustScrollTop(totalHeight))
+
+      if (scrollTop !== null) {
+        this.props.adjustScrollTop(scrollTop)
       }
     }
   }),
