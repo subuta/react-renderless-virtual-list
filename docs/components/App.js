@@ -43,7 +43,7 @@ const renderGroupHeader = ({ row, setSizeRef, style }) => {
     >
       <div
         ref={setSizeRef}
-        className='sticky pin-t z-50 border-b w-screen'
+        className='c-sticky pin-t z-50 w-screen'
       >
         <div className="py-2 px-4 bg-red text-white font-bold">{groupHeader}th</div>
       </div>

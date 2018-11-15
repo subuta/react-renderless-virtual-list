@@ -64,3 +64,9 @@
 ul {
   @apply list-reset;
 }
+
+.c-sticky {
+  position: static;
+  position: -webkit-sticky;
+  position: sticky;
+}

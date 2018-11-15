@@ -6285,6 +6285,12 @@ ul {
   padding: 0;
 }
 
+.c-sticky {
+  position: static;
+  position: -webkit-sticky;
+  position: sticky;
+}
+
 @media (min-width: 576px) {
   .sm\:list-reset {
     list-style: none;

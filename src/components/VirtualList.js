@@ -60,6 +60,7 @@ const defaults = {
       groupHeader,
       isGroupHeader,
       startOfRows,
+      groupHeight,
       top,
       bottom
     } = props
@@ -78,6 +79,7 @@ const defaults = {
         isGroupHeader={isGroupHeader}
         top={top}
         bottom={bottom}
+        groupHeight={groupHeight}
       >
         {isGroupHeader ? props.renderGroupHeader : props.children}
       </VirtualListItem>
@@ -111,13 +113,14 @@ const enhance = compose(
           nextGroupHeader = groupBy({ row, index })
         }
 
+        nextRows.push(row)
+
         if (lastGroupHeader !== undefined && nextGroupHeader !== lastGroupHeader) {
           nextRows.push({ groupHeader: nextGroupHeader })
           // Keep current indices.
           groupIndices.push(nextRows.length - 1)
         }
 
-        nextRows.push(row)
         lastGroupHeader = nextGroupHeader
       })
 
@@ -395,13 +398,14 @@ export default enhance((props) => {
     renderListItem,
     renderListContainer,
     getSizeCache,
-    totalHeight,
     reversed
   } = props
 
   let startOfRows = _.get(props, 'positions.from')
-  let oppositeEdge = 0
   const endOfRows = _.get(props, 'positions.to')
+
+  let sumOfGroupHeight = 0
+  let groupHeight = 0
 
   const List = renderList
   const Container = renderListContainer
@@ -416,6 +420,8 @@ export default enhance((props) => {
         {_.map(rows, (row, index) => {
           const isGroupHeader = _.includes(groupIndices, index)
 
+          groupHeight += heightCache[index]
+
           if (!isGroupHeader) {
             // No-render if index out of range.
             if (index < overScanIndex.from || index > overScanIndex.to) return null
@@ -424,33 +430,25 @@ export default enhance((props) => {
 
           const size = sizeCache[index] || {}
 
-          let itemProps = {
+          const component = renderListItem({
             ...props,
             row,
             index,
             size,
             startOfRows,
-            [reversed ? 'bottom' : 'top']: startOfRows,
+            [reversed ? 'bottom' : 'top']: isGroupHeader ? sumOfGroupHeight : startOfRows,
+            groupHeight,
             isGroupHeader
+          })
+
+          if (isGroupHeader) {
+            sumOfGroupHeight += groupHeight
+            groupHeight = size.height || 0
           }
 
           startOfRows += heightCache[index]
 
-          if (isGroupHeader) {
-            const oppositeEdgeAttr = reversed ? 'top' : 'bottom'
-
-            itemProps = {
-              ...itemProps,
-              [oppositeEdgeAttr]: totalHeight - itemProps[reversed ? 'bottom' : 'top'] + 8,
-              [reversed ? 'bottom' : 'top']: oppositeEdge
-            }
-
-            console.log('itemProps = ', itemProps)
-
-            oppositeEdge = startOfRows
-          }
-
-          return renderListItem(itemProps)
+          return component
         })}
       </List>
     </Container>
