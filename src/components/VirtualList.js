@@ -57,6 +57,7 @@ const defaults = {
       reversed,
       row,
       index,
+      groupHeader,
       startOfRows
     } = props
 
@@ -65,6 +66,7 @@ const defaults = {
         key={index}
         row={row}
         index={index}
+        groupHeader={groupHeader}
         onMeasure={onMeasure}
         size={size}
         defaultRowSize={rowSize}
@@ -91,6 +93,35 @@ const enhance = compose(
   // Specify defaults
   defaultProps(defaults),
   withPropsOnChange(
+    ['rows'],
+    ({ rows, groupBy }) => {
+      let groupIndices = []
+      let nextRows = []
+      let lastGroupHeader = undefined
+
+      _.each(rows, (row, index) => {
+        let nextGroupHeader = null
+        if (groupBy) {
+          nextGroupHeader = groupBy({ row, index })
+        }
+
+        if (lastGroupHeader !== undefined && nextGroupHeader !== lastGroupHeader) {
+          nextRows.push({ groupHeader: nextGroupHeader })
+          // Keep current indices.
+          groupIndices.push(nextRows.length - 1)
+        }
+
+        nextRows.push(row)
+        lastGroupHeader = nextGroupHeader
+      })
+
+      return {
+        groupIndices,
+        rows: nextRows
+      }
+    }
+  ),
+  withPropsOnChange(
     ['onLoadMore', 'onScroll'],
     ({ onLoadMore, onScroll }) => ({
       onScroll: _.debounce(onScroll || _.noop, 300, { leading: true, trailing: false }),
@@ -105,6 +136,7 @@ const enhance = compose(
   ),
   withProps(({ height }) => {
     if (height === 0) return { height: defaults.height }
+
     return {
       height: _.isNumber(height) ? height : parseFloat(height, 10),
     }
@@ -345,14 +377,13 @@ export default enhance((props) => {
     rows = [],
     containerStyle = {},
     listStyle = {},
+    groupIndices,
     // Will be used as height before render row.
     overScanIndex = {
       from: 0,
       to: rows.length - 1
     },
     heightCache = [],
-    groupBy,
-    renderGroupHeader,
     renderList,
     setScrollContainerRef,
     renderListItem,
@@ -367,45 +398,32 @@ export default enhance((props) => {
   const Container = renderListContainer
   const sizeCache = getSizeCache()
 
-  let lastGroupHeader = null
-  const listItems = []
-
-  _.each(rows, (row, index) => {
-    // No-render if index out of range.
-    if (index < overScanIndex.from || index > overScanIndex.to) return null
-    if (startOfRows > endOfRows) return null
-
-    let nextGroupHeader = null
-    if (groupBy) {
-      nextGroupHeader = groupBy({ row, index })
-    }
-
-    const size = sizeCache[index] || {}
-
-    const component = renderListItem({
-      ...props,
-      row,
-      index,
-      size,
-      startOfRows
-    })
-
-    if (renderGroupHeader && nextGroupHeader !== lastGroupHeader) {
-      listItems.push(renderGroupHeader({ groupHeader: nextGroupHeader }))
-    }
-    lastGroupHeader = nextGroupHeader
-
-    startOfRows += heightCache[index]
-    listItems.push(component)
-  })
-
   return (
     <Container
       style={containerStyle}
       setScrollContainerRef={setScrollContainerRef}
     >
       <List style={listStyle}>
-        {listItems}
+        {_.map(rows, (row, index) => {
+          // No-render if index out of range.
+          if (index < overScanIndex.from || index > overScanIndex.to) return null
+          if (startOfRows > endOfRows) return null
+
+          const size = sizeCache[index] || {}
+
+          const component = renderListItem({
+            ...props,
+            row,
+            index,
+            size,
+            startOfRows,
+            children: _.includes(groupIndices, index) ? props.renderGroupHeader : props.children
+          })
+
+          startOfRows += heightCache[index]
+
+          return component
+        })}
       </List>
     </Container>
   )

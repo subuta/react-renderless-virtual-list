@@ -16,7 +16,7 @@ import {
   withPropsOnChange
 } from 'recompose'
 
-const renderRow = ({ row, index, setSizeRef, style }) => {
+const renderRow = ({ row, setSizeRef, style }) => {
   return (
     <div
       className={`row-${row.id}`}
@@ -29,6 +29,23 @@ const renderRow = ({ row, index, setSizeRef, style }) => {
         <span className='text-red font-bold'>Row: {row.id}</span>
 
         <p>{row.text}</p>
+      </div>
+    </div>
+  )
+}
+
+const renderGroupHeader = ({ row, setSizeRef, style }) => {
+  const { groupHeader } = row
+  return (
+    <div
+      className={`header-${groupHeader}`}
+      style={style}
+    >
+      <div
+        ref={setSizeRef}
+        className='sticky border-b w-screen'
+      >
+        <div className="py-2 px-4 bg-red text-white font-bold">{groupHeader}th</div>
       </div>
     </div>
   )
@@ -86,13 +103,9 @@ export default enhance(({ rows, onScroll, onLoadMore }) => {
                 height={size.height}
                 rows={rows}
                 groupBy={({ row }) => {
-                  return Math.floor(row.id / 100)
+                  return Math.floor(row.id / 25) * 25
                 }}
-                renderGroupHeader={({ groupHeader }) => {
-                  return (
-                    <div key={`header-${groupHeader}`} className={`header-${groupHeader} sticky pin-t`}>{groupHeader}</div>
-                  )
-                }}
+                renderGroupHeader={renderGroupHeader}
                 reversed
               >
                 {renderRow}
