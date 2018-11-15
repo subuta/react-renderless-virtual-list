@@ -61,6 +61,7 @@ test('should render with style and reversed.', () => {
   const wrapper = mount(
     <VirtualListItem
       startOfRows={0}
+      bottom={0}
       size={{ height: 100, width: 100 }}
       defaultRowSize={{ height: 100, width: 100 }}
       reversed
@@ -91,6 +92,7 @@ test('should render with style when size set.', () => {
     <VirtualListItem
       index={0}
       startOfRows={0}
+      top={0}
       size={{ height: 100, width: 100 }}
       defaultRowSize={{ height: 100, width: 100 }}
       onMeasure={onMeasure}
@@ -118,6 +120,7 @@ test('should render with style when size set.', () => {
   // When size and startOfRows changed.
   wrapper.setProps({
     startOfRows: 100,
+    top: 100,
     size: {
       height: 200,
       width: 200
