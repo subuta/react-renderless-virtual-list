@@ -30,16 +30,23 @@ const enhance = compose(
       setSizeRef,
       row,
       index,
-      startOfRows
+      isGroupHeader,
+      top,
+      bottom
     } = props
 
     let style = {
       position: 'absolute',
-      [reversed ? 'bottom' : 'top']: startOfRows,
+      [reversed ? 'bottom' : 'top']: reversed ? bottom : top,
       left: 0
     }
 
-    if (size.height) {
+    const oppositeEdgeAttr = reversed ? 'top' : 'bottom'
+    if (props[oppositeEdgeAttr]) {
+      style[oppositeEdgeAttr] = props[oppositeEdgeAttr]
+    }
+
+    if (!isGroupHeader && size.height) {
       style = {
         ...style,
         height: size.height
