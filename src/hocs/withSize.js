@@ -32,9 +32,12 @@ export default compose(
       setSize(nextSize)
     }
   }),
-  withHandlers(({ index, setSize, onResize }) => {
+  withHandlers((props) => {
+    const { index, setSize } = props
+
     let sizeRef = null
     let unobserve = _.noop
+    let onResize = props.onResize
 
     const ro = new ResizeObserver((entries) => onResize(sizeRef, entries))
 
@@ -58,6 +61,7 @@ export default compose(
       },
 
       unobserve: () => () => {
+        onResize = _.noop
         unobserve()
       }
     }
