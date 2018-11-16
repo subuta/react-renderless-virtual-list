@@ -165,6 +165,84 @@ exports[`should render with 30 rows. 1`] = `
     >
       8
     </span>
+    <span
+      className="row-9"
+      style={
+        Object {
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+          "top": 800,
+        }
+      }
+    >
+      9
+    </span>
+    <span
+      className="row-10"
+      style={
+        Object {
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+          "top": 900,
+        }
+      }
+    >
+      10
+    </span>
+    <span
+      className="row-11"
+      style={
+        Object {
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+          "top": 1000,
+        }
+      }
+    >
+      11
+    </span>
+    <span
+      className="row-12"
+      style={
+        Object {
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+          "top": 1100,
+        }
+      }
+    >
+      12
+    </span>
+    <span
+      className="row-13"
+      style={
+        Object {
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+          "top": 1200,
+        }
+      }
+    >
+      13
+    </span>
+    <span
+      className="row-14"
+      style={
+        Object {
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+          "top": 1300,
+        }
+      }
+    >
+      14
+    </span>
   </div>
 </div>
 `;
@@ -212,6 +290,84 @@ exports[`should render with height as px 1`] = `
 exports[`should render with reversed 30 rows. 1`] = `
 <div>
   <div>
+    <span
+      className="row-17"
+      style={
+        Object {
+          "bottom": 1600,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      17
+    </span>
+    <span
+      className="row-18"
+      style={
+        Object {
+          "bottom": 1700,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      18
+    </span>
+    <span
+      className="row-19"
+      style={
+        Object {
+          "bottom": 1800,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      19
+    </span>
+    <span
+      className="row-20"
+      style={
+        Object {
+          "bottom": 1900,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      20
+    </span>
+    <span
+      className="row-21"
+      style={
+        Object {
+          "bottom": 2000,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      21
+    </span>
+    <span
+      className="row-22"
+      style={
+        Object {
+          "bottom": 2100,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      22
+    </span>
     <span
       className="row-23"
       style={

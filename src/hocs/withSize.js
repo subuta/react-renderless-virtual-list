@@ -33,8 +33,6 @@ export default compose(
     }
   }),
   withHandlers((props) => {
-    const { index, setSize } = props
-
     let sizeRef = null
     let unobserve = _.noop
     let onResize = props.onResize

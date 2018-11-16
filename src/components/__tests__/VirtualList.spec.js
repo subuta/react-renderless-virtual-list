@@ -324,12 +324,12 @@ test('should render with 30 rows.', () => {
   })
 
   // Should render only-visible child rows.
-  expect(child.callCount).toBe(8)
+  expect(child.callCount).toBe(14)
 
   clock.runAll()
 
   // Should not-render after setDebouncedHeightCache.
-  expect(child.callCount).toBe(8)
+  expect(child.callCount).toBe(14)
 
   const childProps = child.firstCall.args[0]
 
@@ -345,12 +345,12 @@ test('should render with 30 rows.', () => {
 
   const lastCallChildProps = child.lastCall.args[0]
 
-  expect(lastCallChildProps.row).toEqual({ id: 8 })
-  expect(lastCallChildProps.index).toEqual(7)
+  expect(lastCallChildProps.row).toEqual({ id: 14 })
+  expect(lastCallChildProps.index).toEqual(13)
   expect(lastCallChildProps.setSizeRef).toBeInstanceOf(Function)
   expect(lastCallChildProps.style).toEqual({
     position: 'absolute',
-    top: 700,
+    top: 1300,
     left: 0,
     minHeight: 100
   })
@@ -413,21 +413,21 @@ test('should render with reversed 30 rows.', () => {
   })
 
   // Should render only-visible child rows.
-  expect(child.callCount).toBe(8)
+  expect(child.callCount).toBe(14)
 
   clock.runAll()
 
   // Should not-render after setDebouncedHeightCache.
-  expect(child.callCount).toBe(8)
+  expect(child.callCount).toBe(14)
 
   const childProps = child.firstCall.args[0]
 
-  expect(childProps.row).toEqual({ id: 23 })
-  expect(childProps.index).toEqual(22)
+  expect(childProps.row).toEqual({ id: 17 })
+  expect(childProps.index).toEqual(16)
   expect(childProps.setSizeRef).toBeInstanceOf(Function)
   expect(childProps.style).toEqual({
     position: 'absolute',
-    bottom: 2200,
+    bottom: 1600,
     left: 0,
     minHeight: 100
   })

@@ -86,7 +86,7 @@ const defaults = {
     )
   },
 
-  overScanCount: 4,
+  overScanCount: 10,
 
   height: 300,
 
@@ -306,7 +306,7 @@ const enhance = compose(
         }
       },
 
-      adjustScrollTop: (props) => (scrollTop) => {
+      adjustScrollTop: (props) => (totalHeight) => {
         const {
           requestScrollTo,
           requestScrollToBottom,
@@ -314,7 +314,7 @@ const enhance = compose(
         } = props
 
         if (isAdjusted) {
-          requestScrollTo(scrollTop)
+          requestScrollTo(props.totalHeight - totalHeight)
         } else {
           requestScrollToBottom()
           requestAnimationFrame(() => {
@@ -353,22 +353,16 @@ const enhance = compose(
 
     getSnapshotBeforeUpdate (prevProps) {
       if (!_.isEqual(prevProps.rows, this.props.rows)) {
-        return prevProps.scrollTop
+        return this.props.totalHeight
       }
-
-      if (prevProps.totalHeight !== this.props.totalHeight) {
-        const diff = this.props.totalHeight - prevProps.totalHeight
-        return this.props.scrollTop + diff
-      }
-
       return null
     },
 
-    componentDidUpdate (prevProps, prevState, scrollTop) {
+    componentDidUpdate (prevProps, prevState, totalHeight) {
       if (!this.props.reversed) return
 
-      if (scrollTop !== null) {
-        this.props.adjustScrollTop(scrollTop)
+      if (totalHeight !== null) {
+        requestAnimationFrame(() => this.props.adjustScrollTop(totalHeight))
       }
     }
   }),
