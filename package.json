@@ -30,6 +30,7 @@
     "setupTestFrameworkScriptFile": "<rootDir>/scripts/jest.setup.js"
   },
   "dependencies": {
+    "fastdom": "^1.0.8",
     "lodash": "^4.17.11",
     "resize-observer-polyfill": "^1.5.0"
   },

@@ -306,21 +306,28 @@ const enhance = compose(
         }
       },
 
-      adjustScrollTop: (props) => (totalHeight) => {
-        const {
-          requestScrollTo,
-          requestScrollToBottom,
-          hasScrolledToBottom
-        } = props
+      adjustScrollTop: (props) => {
+        const fn = (totalHeight) => {
+          const {
+            requestScrollTo,
+            requestScrollToBottom,
+            hasScrolledToBottom
+          } = props
 
-        if (isAdjusted) {
-          requestScrollTo(props.totalHeight - totalHeight)
-        } else {
-          requestScrollToBottom()
-          requestAnimationFrame(() => {
-            isAdjusted = hasScrolledToBottom()
-          })
+          if (isAdjusted) {
+            requestScrollTo(props.totalHeight - totalHeight)
+          } else {
+            requestScrollToBottom()
+            hasScrolledToBottom().then((bool) => {
+              isAdjusted = bool
+              if (!isAdjusted) {
+                _.delay(() => fn(), 300)
+              }
+            })
+          }
         }
+
+        return fn
       }
     }
   }),
@@ -347,7 +354,7 @@ const enhance = compose(
   lifecycle({
     componentDidMount () {
       if (this.props.reversed) {
-        this.props.adjustScrollTop()
+        requestAnimationFrame(() => this.props.adjustScrollTop())
       }
     },
 

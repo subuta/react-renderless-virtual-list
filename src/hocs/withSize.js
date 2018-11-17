@@ -8,6 +8,7 @@ import {
 import _ from 'lodash'
 
 import ResizeObserver from 'resize-observer-polyfill'
+import fastdom from 'src/utils/fastdom'
 
 export default compose(
   pure,
@@ -37,7 +38,9 @@ export default compose(
     let unobserve = _.noop
     let onResize = props.onResize
 
-    const ro = new ResizeObserver((entries) => onResize(sizeRef, entries))
+    const ro = new ResizeObserver((entries) => {
+      fastdom.measure(() => onResize(sizeRef, entries))
+    })
 
     const observe = () => {
       if (!sizeRef) return

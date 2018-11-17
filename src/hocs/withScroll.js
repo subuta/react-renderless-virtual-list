@@ -7,6 +7,8 @@ import {
 } from 'recompose'
 import _ from 'lodash'
 
+import fastdom from 'src/utils/fastdom'
+
 export const SCROLL_REASON_REQUESTED = 'SCROLL_REASON_REQUESTED'
 export const SCROLL_REASON_TO_BOTTOM_REQUESTED = 'SCROLL_REASON_TO_BOTTOM_REQUESTED'
 export const SCROLL_REASON_ON_SCROLL_EVENT = 'SCROLL_REASON_ON_SCROLL_EVENT'
@@ -44,15 +46,11 @@ export default compose(
   withHandlers((props) => {
     let listen = _.noop
     let scrollContainerRef = null
-    let lastScrollTop = null
-
     let isTicking = false
 
     const onScroll = (e) => {
-      lastScrollTop = scrollContainerRef.scrollTop
-
       if (!isTicking) {
-        requestAnimationFrame(() => {
+        fastdom.measure(() => {
           props._onScroll(scrollContainerRef.scrollTop, e)
           isTicking = false
         })
@@ -75,15 +73,21 @@ export default compose(
       },
 
       scrollTo: () => (scrollTop) => {
-        scrollContainerRef.scrollTop = scrollTop
+        fastdom.mutate(() => {
+          scrollContainerRef.scrollTop = scrollTop
+        })
       },
 
       scrollToBottom: () => () => {
-        scrollContainerRef.scrollTop = scrollContainerRef.scrollHeight
+        fastdom.mutate(() => {
+          scrollContainerRef.scrollTop = scrollContainerRef.scrollHeight
+        })
       },
 
       hasScrolledToBottom: () => () => {
-        return scrollContainerRef.scrollTop === scrollContainerRef.scrollHeight - scrollContainerRef.clientHeight
+        return fastdom.measure(() => {
+          return scrollContainerRef.scrollTop === scrollContainerRef.scrollHeight - scrollContainerRef.clientHeight
+        })
       },
 
       listen: () => listen
