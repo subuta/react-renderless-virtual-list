@@ -15,8 +15,6 @@ const mockedObserve = jest.fn()
 const mockedUnobserve = jest.fn()
 
 const mockedRequestScrollTo = jest.fn()
-const mockedRequestScrollToBottom = jest.fn()
-const mockedHasScrolledToBottom = jest.fn()
 
 // Mock withScroll while testing.
 jest.mock('src/hocs/withScroll', () => {
@@ -25,8 +23,6 @@ jest.mock('src/hocs/withScroll', () => {
       <Component
         {...props}
         requestScrollTo={mockedRequestScrollTo}
-        requestScrollToBottom={mockedRequestScrollToBottom}
-        hasScrolledToBottom={mockedHasScrolledToBottom}
       />
     )
   })
@@ -45,8 +41,6 @@ jest.mock('resize-observer-polyfill', () => {
 beforeEach(() => {
   clock = sinon.useFakeTimers()
   mockedRequestScrollTo.mockClear()
-  mockedRequestScrollToBottom.mockClear()
-  mockedHasScrolledToBottom.mockClear()
   ResizeObserver.mockClear()
   mockedObserve.mockClear()
   mockedUnobserve.mockClear()
@@ -320,16 +314,16 @@ test('should render with 30 rows.', () => {
     position: 'relative',
     minHeight: '100%',
     width: '100%',
-    height: totalHeight
+    height: 10000000
   })
 
   // Should render only-visible child rows.
-  expect(child.callCount).toBe(14)
+  expect(child.callCount).toBe(30)
 
   clock.runAll()
 
   // Should not-render after setDebouncedHeightCache.
-  expect(child.callCount).toBe(14)
+  expect(child.callCount).toBe(30)
 
   const childProps = child.firstCall.args[0]
 
@@ -345,12 +339,12 @@ test('should render with 30 rows.', () => {
 
   const lastCallChildProps = child.lastCall.args[0]
 
-  expect(lastCallChildProps.row).toEqual({ id: 14 })
-  expect(lastCallChildProps.index).toEqual(13)
+  expect(lastCallChildProps.row).toEqual({ id: 30 })
+  expect(lastCallChildProps.index).toEqual(29)
   expect(lastCallChildProps.setSizeRef).toBeInstanceOf(Function)
   expect(lastCallChildProps.style).toEqual({
     position: 'absolute',
-    top: 1300,
+    top: 2900,
     left: 0,
     minHeight: 100
   })
@@ -389,7 +383,7 @@ test('should render with reversed 30 rows.', () => {
     </VirtualList>
   )
 
-  expect(mockedRequestScrollToBottom).toHaveBeenCalled();
+  expect(mockedRequestScrollTo).toHaveBeenCalled();
 
   expect(renderListContainer.callCount).toBe(1)
 
@@ -409,25 +403,25 @@ test('should render with reversed 30 rows.', () => {
     position: 'relative',
     minHeight: '100%',
     width: '100%',
-    height: totalHeight
+    height: 10000000
   })
 
   // Should render only-visible child rows.
-  expect(child.callCount).toBe(14)
+  expect(child.callCount).toBe(30)
 
   clock.runAll()
 
   // Should not-render after setDebouncedHeightCache.
-  expect(child.callCount).toBe(14)
+  expect(child.callCount).toBe(30)
 
   const childProps = child.firstCall.args[0]
 
-  expect(childProps.row).toEqual({ id: 17 })
-  expect(childProps.index).toEqual(16)
+  expect(childProps.row).toEqual({ id: 1 })
+  expect(childProps.index).toEqual(0)
   expect(childProps.setSizeRef).toBeInstanceOf(Function)
   expect(childProps.style).toEqual({
     position: 'absolute',
-    bottom: 1600,
+    bottom: 0,
     left: 0,
     minHeight: 100
   })

@@ -15,6 +15,7 @@ import {
 } from 'recompose'
 
 import withScroll from 'src/hocs/withScroll'
+import VirtualListState from 'src/utils/virtualListState'
 
 import VirtualListItem from './VirtualListItem'
 
@@ -118,9 +119,9 @@ const enhance = compose(
         nextRows.push(row)
 
         if (lastGroupHeader !== undefined && nextGroupHeader !== lastGroupHeader) {
-          nextRows.push({ groupHeader: nextGroupHeader })
           // Keep current indices.
-          groupIndices.push(nextRows.length - 1)
+          groupIndices.push(nextRows.length)
+          nextRows.push({ groupHeader: nextGroupHeader })
         }
 
         lastGroupHeader = nextGroupHeader
@@ -153,20 +154,25 @@ const enhance = compose(
     }
   }),
   withStateHandlers(
-    ({ reversed, rows }) => {
+    ({ reversed, rows, groupIndices }) => {
       const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
+      const virtualListState = new VirtualListState(fill, groupIndices)
       return {
+        virtualListState,
         heightCache: fill,
-        totalHeight: _.sum(fill)
+        totalHeight: virtualListState.getTotalHeight()
       }
     },
     {
-      mergeHeightCache: (state) => (heightCache) => {
+      mergeHeightCache: (state, { groupIndices }) => (heightCache) => {
         const nextHeightCache = _.merge([...state.heightCache], heightCache)
         if (_.isEqual(state.heightCache, nextHeightCache)) return
+
+        const virtualListState = new VirtualListState(nextHeightCache, groupIndices)
         return {
+          virtualListState,
           heightCache: nextHeightCache,
-          totalHeight: _.sum(nextHeightCache)
+          totalHeight: virtualListState.getTotalHeight()
         }
       }
     }
@@ -208,7 +214,7 @@ const enhance = compose(
           rows,
           height,
           overScanCount,
-          totalHeight,
+          virtualListState,
           reversed
         } = props
 
@@ -219,8 +225,9 @@ const enhance = compose(
         let startOfRows = reversed ? (VIRTUAL_LIST_HEIGHT - (scrollTop + height)) : 0
 
         // End position of rows.
-        let endOfRows = reversed ? (startOfRows + height) : scrollTop + height
+        let endOfRows = reversed ? (startOfRows + height) : (VIRTUAL_LIST_HEIGHT - scrollTop + height)
 
+        // FIXME: Replace here to use virtualListState.
         _.takeWhile(_.times(rows.length), (i) => {
           const h = heightCache[i]
           visibleIndex.to = i
@@ -239,8 +246,8 @@ const enhance = compose(
         })
 
         const overScanIndex = {
-          from: visibleIndex.from - overScanCount >= 0 ? visibleIndex.from - overScanCount : 0,
-          to: visibleIndex.to + overScanCount <= rows.length - 1 ? visibleIndex.to + overScanCount : rows.length - 1
+          from: (visibleIndex.from - overScanCount) >= 0 ? visibleIndex.from - overScanCount : 0,
+          to: (visibleIndex.to + overScanCount) <= rows.length - 1 ? visibleIndex.to + overScanCount : rows.length - 1
         }
 
         // Minus top overScan height for correct startOfRows.
@@ -313,7 +320,7 @@ const enhance = compose(
     }
   }),
   withPropsOnChange(
-    ['scrollTop', 'height', 'totalHeight'],
+    ['scrollTop', 'height'],
     (props) => ({
       ...props.handleScroll(),
       ...props.getStyles()
@@ -374,20 +381,14 @@ export default enhance((props) => {
       from: 0,
       to: rows.length - 1
     },
-    heightCache = [],
     renderList,
     setScrollContainerRef,
     renderListItem,
     renderListContainer,
     getSizeCache,
-    reversed
+    reversed,
+    virtualListState
   } = props
-
-  let startOfRows = _.get(props, 'positions.from')
-  const endOfRows = _.get(props, 'positions.to')
-
-  let sumOfGroupHeight = 0
-  let groupHeight = 0
 
   const List = renderList
   const Container = renderListContainer
@@ -401,36 +402,38 @@ export default enhance((props) => {
       <List style={listStyle}>
         {_.map(rows, (row, index) => {
           const isGroupHeader = _.includes(groupIndices, index)
-
-          groupHeight += heightCache[index]
+          const startOfRows = virtualListState.getStartPos(index)
 
           if (!isGroupHeader) {
             // No-render if index out of range.
             if (index < overScanIndex.from || index > overScanIndex.to) return null
-            if (startOfRows > endOfRows) return null
           }
 
-          const size = sizeCache[index] || {}
+          const size = sizeCache[index] || { height: 0 }
 
-          const component = renderListItem({
+          // TODO: Only render nearest headers.
+          if (isGroupHeader) {
+            const groupHeight = virtualListState.getGroupHeight(index)
+            return renderListItem({
+              ...props,
+              row,
+              index,
+              size,
+              startOfRows,
+              [reversed ? 'bottom' : 'top']: groupHeight.startOfGroups,
+              groupHeight: groupHeight.height + size.height,
+              isGroupHeader
+            })
+          }
+
+          return renderListItem({
             ...props,
             row,
             index,
             size,
             startOfRows,
-            [reversed ? 'bottom' : 'top']: isGroupHeader ? sumOfGroupHeight : startOfRows,
-            groupHeight,
-            isGroupHeader
+            [reversed ? 'bottom' : 'top']: startOfRows
           })
-
-          if (isGroupHeader) {
-            sumOfGroupHeight += groupHeight
-            groupHeight = size.height || 0
-          }
-
-          startOfRows += heightCache[index]
-
-          return component
         })}
       </List>
     </Container>

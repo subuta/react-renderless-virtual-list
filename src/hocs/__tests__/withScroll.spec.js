@@ -135,7 +135,7 @@ test('requestScrollTo should set scrollTop with reason', () => {
   clock.runAll()
 
   // Should changed to requested scrollTop.
-  expect(spiedRef.scrollTop).toBe(300)
+  expect(spiedRef.scrollTop).toBe(100)
   expect(props.scrollReason).toBe('SCROLL_REASON_REQUESTED')
 })
 
