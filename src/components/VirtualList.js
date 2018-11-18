@@ -21,6 +21,8 @@ import VirtualListItem from './VirtualListItem'
 export const SCROLL_DIRECTION_UP = 'SCROLL_DIRECTION_UP'
 export const SCROLL_DIRECTION_DOWN = 'SCROLL_DIRECTION_DOWN'
 
+const VIRTUAL_LIST_HEIGHT = 10000000;
+
 // Default value of props.
 const defaults = {
   renderListContainer: (props) => {
@@ -86,7 +88,7 @@ const defaults = {
     )
   },
 
-  overScanCount: 10,
+  overScanCount: 3,
 
   height: 300,
 
@@ -214,7 +216,7 @@ const enhance = compose(
         let visibleIndex = { from: -1, to: 0 }
 
         // Start position of rows.
-        let startOfRows = reversed ? (totalHeight - (scrollTop + height)) : 0
+        let startOfRows = reversed ? (VIRTUAL_LIST_HEIGHT - (scrollTop + height)) : 0
 
         // End position of rows.
         let endOfRows = reversed ? (startOfRows + height) : scrollTop + height
@@ -283,8 +285,6 @@ const enhance = compose(
 
       getSizeCache: () => () => sizeCache,
 
-      getIsAdjusted: () => () => isAdjusted,
-
       getStyles: ({ totalHeight, heightCache, height }) => () => {
         const containerStyle = {
           height,
@@ -297,7 +297,7 @@ const enhance = compose(
           position: 'relative',
           minHeight: '100%',
           width: '100%',
-          height: totalHeight
+          height: VIRTUAL_LIST_HEIGHT
         }
 
         return {
@@ -306,28 +306,9 @@ const enhance = compose(
         }
       },
 
-      adjustScrollTop: (props) => {
-        const fn = (totalHeight) => {
-          const {
-            requestScrollTo,
-            requestScrollToBottom,
-            hasScrolledToBottom
-          } = props
-
-          if (isAdjusted) {
-            requestScrollTo(props.totalHeight - totalHeight)
-          } else {
-            requestScrollToBottom()
-            hasScrolledToBottom().then((bool) => {
-              isAdjusted = bool
-              if (!isAdjusted) {
-                _.delay(() => fn(), 300)
-              }
-            })
-          }
-        }
-
-        return fn
+      adjustScrollTop: ({ requestScrollTo }) => (totalHeight = 0) => {
+        requestScrollTo(VIRTUAL_LIST_HEIGHT - totalHeight)
+        isAdjusted = true
       }
     }
   }),
@@ -354,7 +335,7 @@ const enhance = compose(
   lifecycle({
     componentDidMount () {
       if (this.props.reversed) {
-        requestAnimationFrame(() => this.props.adjustScrollTop())
+        this.props.adjustScrollTop()
       }
     },
 
@@ -369,7 +350,7 @@ const enhance = compose(
       if (!this.props.reversed) return
 
       if (totalHeight !== null) {
-        requestAnimationFrame(() => this.props.adjustScrollTop(totalHeight))
+        this.props.adjustScrollTop(totalHeight)
       }
     }
   }),
