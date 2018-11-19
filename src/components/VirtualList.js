@@ -108,7 +108,7 @@ const enhance = compose(
     ({ rows, groupBy }) => {
       let groupIndices = []
       let nextRows = []
-      let lastGroupHeader = undefined
+      let lastGroupHeader = null
 
       _.each(rows, (row, index) => {
         let nextGroupHeader = null
@@ -118,7 +118,7 @@ const enhance = compose(
 
         nextRows.push(row)
 
-        if (lastGroupHeader !== undefined && nextGroupHeader !== lastGroupHeader) {
+        if (nextGroupHeader !== lastGroupHeader) {
           // Keep current indices.
           groupIndices.push(nextRows.length)
           nextRows.push({ groupHeader: nextGroupHeader })

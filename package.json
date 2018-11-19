@@ -1,10 +1,10 @@
 {
   "name": "react-renderless-virtual-list",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Renderless Virtual List component of react.",
   "main": "lib/index.js",
   "scripts": {
-    "serve": "poi docs-src/index.js",
+    "serve": "poi docs/index.js",
     "build:docs": "poi build docs/index.js --out-dir docs-dist --public-path /react-renderless-virtual-list/",
     "build-dev:docs": "poi build docs/index.js --out-dir docs-dist",
     "serve:docs": "cd docs-dist && serve",

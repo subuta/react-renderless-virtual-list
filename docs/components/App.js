@@ -103,7 +103,10 @@ export default enhance(({ rows, onScroll, onLoadMore }) => {
                 height={size.height}
                 rows={rows}
                 groupBy={({ row }) => {
-                  return Math.floor(row.id / 25) * 25
+                  const header = Math.floor(row.id / 25) * 25
+                  if (header === 0) return null
+
+                  return header
                 }}
                 renderGroupHeader={renderGroupHeader}
                 reversed
