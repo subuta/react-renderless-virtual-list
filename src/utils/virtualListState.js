@@ -27,7 +27,8 @@ class VirtualListState {
     let sumOfHeights = 0
 
     _.each(groupIndices, (index) => {
-      const groupHeight = _.sum(this.heights.slice(lastIndex, index))
+      const heights = this.heights.slice(lastIndex, lastIndex === 0 ? index + 1 : index)
+      const groupHeight = _.sum(heights)
 
       this.groupHeights.set(index, {
         height: groupHeight,

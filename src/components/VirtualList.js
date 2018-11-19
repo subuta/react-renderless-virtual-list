@@ -385,6 +385,7 @@ export default enhance((props) => {
             if (!_.includes(nearestGroupIndices.all, index)) return null
 
             const groupHeight = virtualListState.getGroupHeight(index)
+
             return renderListItem({
               ...props,
               row,
@@ -392,7 +393,7 @@ export default enhance((props) => {
               size,
               fromOfRows,
               [reversed ? 'bottom' : 'top']: groupHeight.from,
-              groupHeight: groupHeight.height + size.height,
+              groupHeight: groupHeight.height,
               isGroupHeader: true
             })
           }

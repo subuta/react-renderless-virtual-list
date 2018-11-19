@@ -136,11 +136,11 @@ test('should return groupHeights', () => {
     100, 100, 100, 100, 50
   ]
 
-  const virtualListState = new VirtualListState(heights, [4, 8, 13])
+  const virtualListState = new VirtualListState(heights, [3, 7, 12])
 
-  expect(virtualListState.getGroupHeight(4)).toEqual({ height: 350, from: 0 })
-  expect(virtualListState.getGroupHeight(8)).toEqual({ height: 350, from: 350 })
-  expect(virtualListState.getGroupHeight(13)).toEqual({ height: 450, from: 700 })
+  expect(virtualListState.getGroupHeight(3)).toEqual({ height: 350, from: 0 })
+  expect(virtualListState.getGroupHeight(7)).toEqual({ height: 350, from: 350 })
+  expect(virtualListState.getGroupHeight(12)).toEqual({ height: 450, from: 700 })
 })
 
 test('should return nearestGroupIndices', () => {
