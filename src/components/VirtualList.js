@@ -365,6 +365,10 @@ export default enhance((props) => {
   const List = renderList
   const Container = renderListContainer
   const sizeCache = getSizeCache()
+  const nearestGroupIndices = virtualListState.nearestGroupIndices(
+    overScanIndex.fromPosition,
+    overScanIndex.toPosition
+  )
 
   return (
     <Container
@@ -373,18 +377,13 @@ export default enhance((props) => {
     >
       <List style={listStyle}>
         {_.map(rows, (row, index) => {
-          const isGroupHeader = _.includes(groupIndices, index)
           const fromOfRows = virtualListState.getFromPosition(index)
-
-          if (!isGroupHeader) {
-            // No-render if index out of range.
-            if (index < overScanIndex.from || index > overScanIndex.to) return null
-          }
-
           const size = sizeCache[index] || { height: 0 }
 
-          // TODO: Only render nearest headers.
-          if (isGroupHeader) {
+          if (_.includes(groupIndices, index)) {
+            // Skip extra group headers.
+            if (!_.includes(nearestGroupIndices.all, index)) return null
+
             const groupHeight = virtualListState.getGroupHeight(index)
             return renderListItem({
               ...props,
@@ -394,9 +393,12 @@ export default enhance((props) => {
               fromOfRows,
               [reversed ? 'bottom' : 'top']: groupHeight.from,
               groupHeight: groupHeight.height + size.height,
-              isGroupHeader
+              isGroupHeader: true
             })
           }
+
+          // No-render if index out of range.
+          if (index < overScanIndex.from || index > overScanIndex.to) return null
 
           return renderListItem({
             ...props,

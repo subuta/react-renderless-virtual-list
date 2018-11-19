@@ -37,6 +37,8 @@ class VirtualListState {
       sumOfHeights += groupHeight
       lastIndex = index
     })
+
+    this.groupIndices = groupIndices
   }
 
   getTotalHeight () {
@@ -54,6 +56,19 @@ class VirtualListState {
   getFromPosition (index) {
     if (index === 0) return 0
     return this.getFromOfRows()[index - 1] || 0
+  }
+
+  nearestGroupIndices (fromPosition, toPosition) {
+    const visibleIndex = this.findVisibleIndex(fromPosition, toPosition)
+
+    const first = _.findLast(this.groupIndices, (index) => visibleIndex.from >= index) || null
+    const visible = _.filter(this.groupIndices, (index) => visibleIndex.from <= index && index <= visibleIndex.to)
+    const last = _.find(this.groupIndices, (index) => index >= visibleIndex.to) || null
+
+    return {
+      first, visible, last,
+      all: _.uniq(_.compact([ first, ...visible, last ]))
+    }
   }
 
   findVisibleIndex (fromPosition, toPosition) {
