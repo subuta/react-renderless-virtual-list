@@ -1,6 +1,6 @@
 {
   "name": "react-renderless-virtual-list",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Renderless Virtual List component of react.",
   "main": "lib/index.js",
   "scripts": {

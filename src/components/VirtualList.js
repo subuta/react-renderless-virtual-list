@@ -113,7 +113,7 @@ const enhance = compose(
       _.each(rows, (row, index) => {
         let nextGroupHeader = null
         if (groupBy) {
-          nextGroupHeader = groupBy({ row, index })
+          nextGroupHeader = groupBy({ rows, row, index, lastGroupHeader })
         }
 
         nextRows.push(row)
