@@ -7,9 +7,11 @@
     "serve": "poi docs-src/index.js",
     "build:docs": "poi build docs-src/index.js --out-dir docs --public-path /react-renderless-virtual-list/",
     "serve:docs": "cd docs && serve",
+    "deploy:docs": "npm run build:docs && gh-pages -d docs",
     "build": "rollup -c",
     "build:css": "tailwind build ./docs/styles.css -o static/styles.css",
     "prepare": "npm run build",
+    "publish": "npm run deploy:docs",
     "test": "jest"
   },
   "repository": {
@@ -49,6 +51,7 @@
     "enzyme": "^3.7.0",
     "enzyme-adapter-react-16": "^1.6.0",
     "faker": "^4.1.0",
+    "gh-pages": "^2.0.1",
     "jest": "^23.6.0",
     "poi": "^10.2.10",
     "react": "^16.5.2",
