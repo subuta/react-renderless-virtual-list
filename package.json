@@ -1,8 +1,8 @@
 {
   "name": "react-renderless-virtual-list",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Renderless Virtual List component of react.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "serve": "poi docs-src/index.js",
     "build:docs": "poi build docs-src/index.js --out-dir docs",
@@ -29,6 +29,9 @@
     ],
     "setupTestFrameworkScriptFile": "<rootDir>/scripts/jest.setup.js"
   },
+  "files": [
+    "lib/**/*"
+  ],
   "dependencies": {
     "fastdom": "^1.0.8",
     "lodash": "^4.17.11",
