@@ -218,10 +218,10 @@ const enhance = compose(
         } = props
 
         // Start position of rows.
-        let fromOfRows = reversed ? (VIRTUAL_LIST_HEIGHT - (scrollTop + height)) : 0
+        let fromOfRows = reversed ? (VIRTUAL_LIST_HEIGHT - (scrollTop + height)) : scrollTop
 
         // End position of rows.
-        let endOfRows = reversed ? (fromOfRows + height) : (VIRTUAL_LIST_HEIGHT - scrollTop + height)
+        let endOfRows = fromOfRows + height
 
         const visibleIndex = virtualListState.findVisibleIndex(fromOfRows, endOfRows)
         const overScanIndex = virtualListState.findOverScanIndex(fromOfRows, endOfRows, overScanCount)
