@@ -62,7 +62,7 @@ const defaults = {
       index,
       groupHeader,
       isGroupHeader,
-      startOfRows,
+      fromOfRows,
       groupHeight,
       top,
       bottom
@@ -78,7 +78,7 @@ const defaults = {
         size={size}
         defaultRowSize={rowSize}
         reversed={reversed}
-        startOfRows={startOfRows}
+        fromOfRows={fromOfRows}
         isGroupHeader={isGroupHeader}
         top={top}
         bottom={bottom}
@@ -143,7 +143,7 @@ const enhance = compose(
   withPropsOnChange(
     ['renderListItem'],
     ({ renderListItem }) => ({
-      renderListItem: _.memoize(renderListItem, ({ index, startOfRows, size }) => `row-${index}-${startOfRows}${size.height ? `-${size.height}` : ''}`)
+      renderListItem: _.memoize(renderListItem, ({ index, fromOfRows, size }) => `row-${index}-${fromOfRows}${size.height ? `-${size.height}` : ''}`)
     })
   ),
   withProps(({ height }) => {
@@ -210,7 +210,6 @@ const enhance = compose(
           scrollTop = 0,
           onScroll,
           onLoadMore,
-          heightCache,
           rows,
           height,
           overScanCount,
@@ -218,41 +217,14 @@ const enhance = compose(
           reversed
         } = props
 
-        let sum = 0
-        let visibleIndex = { from: -1, to: 0 }
-
         // Start position of rows.
-        let startOfRows = reversed ? (VIRTUAL_LIST_HEIGHT - (scrollTop + height)) : 0
+        let fromOfRows = reversed ? (VIRTUAL_LIST_HEIGHT - (scrollTop + height)) : 0
 
         // End position of rows.
-        let endOfRows = reversed ? (startOfRows + height) : (VIRTUAL_LIST_HEIGHT - scrollTop + height)
+        let endOfRows = reversed ? (fromOfRows + height) : (VIRTUAL_LIST_HEIGHT - scrollTop + height)
 
-        // FIXME: Replace here to use virtualListState.
-        _.takeWhile(_.times(rows.length), (i) => {
-          const h = heightCache[i]
-          visibleIndex.to = i
-
-          if (visibleIndex.from === -1 && sum + h >= (reversed ? startOfRows : scrollTop)) {
-            visibleIndex.from = i
-            // Use current sum as start position of rows.
-            startOfRows = sum
-          }
-
-          if (sum >= endOfRows) return false
-
-          sum += h
-
-          return true
-        })
-
-        const overScanIndex = {
-          from: (visibleIndex.from - overScanCount) >= 0 ? visibleIndex.from - overScanCount : 0,
-          to: (visibleIndex.to + overScanCount) <= rows.length - 1 ? visibleIndex.to + overScanCount : rows.length - 1
-        }
-
-        // Minus top overScan height for correct startOfRows.
-        startOfRows -= _.sum(_.slice(heightCache, overScanIndex.from, visibleIndex.from))
-        endOfRows += _.sum(_.slice(heightCache, visibleIndex.to, overScanIndex.to))
+        const visibleIndex = virtualListState.findVisibleIndex(fromOfRows, endOfRows)
+        const overScanIndex = virtualListState.findOverScanIndex(fromOfRows, endOfRows, overScanCount)
 
         const direction = lastScrollTop > scrollTop ? SCROLL_DIRECTION_UP : SCROLL_DIRECTION_DOWN
 
@@ -284,8 +256,8 @@ const enhance = compose(
           visibleIndex,
           overScanIndex,
           positions: {
-            from: startOfRows,
-            to: endOfRows
+            from: overScanIndex.fromPosition,
+            to: overScanIndex.toPosition
           }
         }
       },
@@ -402,7 +374,7 @@ export default enhance((props) => {
       <List style={listStyle}>
         {_.map(rows, (row, index) => {
           const isGroupHeader = _.includes(groupIndices, index)
-          const startOfRows = virtualListState.getStartPos(index)
+          const fromOfRows = virtualListState.getFromPosition(index)
 
           if (!isGroupHeader) {
             // No-render if index out of range.
@@ -419,8 +391,8 @@ export default enhance((props) => {
               row,
               index,
               size,
-              startOfRows,
-              [reversed ? 'bottom' : 'top']: groupHeight.startOfGroups,
+              fromOfRows,
+              [reversed ? 'bottom' : 'top']: groupHeight.from,
               groupHeight: groupHeight.height + size.height,
               isGroupHeader
             })
@@ -431,8 +403,8 @@ export default enhance((props) => {
             row,
             index,
             size,
-            startOfRows,
-            [reversed ? 'bottom' : 'top']: startOfRows
+            fromOfRows,
+            [reversed ? 'bottom' : 'top']: fromOfRows
           })
         })}
       </List>

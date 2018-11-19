@@ -12,7 +12,7 @@ class VirtualListState {
 
   _setRowHeights (heights = []) {
     let sum = 0
-    this.startOfRows = _.transform(heights, (result, height, i) => {
+    this.fromOfRows = _.transform(heights, (result, height, i) => {
       result.set(sum += height, i)
     }, new Map())
 
@@ -31,7 +31,7 @@ class VirtualListState {
 
       this.groupHeights.set(index, {
         height: groupHeight,
-        startOfGroups: sumOfHeights
+        from: sumOfHeights
       })
 
       sumOfHeights += groupHeight
@@ -47,32 +47,43 @@ class VirtualListState {
     return this.groupHeights.get(index)
   }
 
-  getStartOfRows () {
-    return Array.from(this.startOfRows.keys())
+  getFromOfRows () {
+    return Array.from(this.fromOfRows.keys())
   }
 
-  getStartPos (index) {
+  getFromPosition (index) {
     if (index === 0) return 0
-    return this.getStartOfRows()[index - 1] || 0
+    return this.getFromOfRows()[index - 1] || 0
   }
 
-  findVisibleIndex (startPosArg, endPosArg) {
-    const indexes = this.getStartOfRows()
+  findVisibleIndex (fromPosition, toPosition) {
+    const foundFromPosition = _.find(this.getFromOfRows(), (sum) => sum >= fromPosition)
+    const foundToPosition = _.find(this.getFromOfRows(), (sum) => sum >= toPosition)
 
-    let startPos = _.find(indexes, (sum) => sum >= startPosArg)
-    let endPos = _.find(indexes, (sum) => sum >= endPosArg)
-
-    let startIndex = this.startOfRows.get(startPos)
-    let endIndex = this.startOfRows.get(endPos)
-
-    // Start position should not includes edge value.
-    startPos = this.getStartPos(startIndex)
+    const from = this.fromOfRows.get(foundFromPosition)
+    const to = this.fromOfRows.get(foundToPosition)
 
     return {
-      start: startIndex,
-      end: endIndex,
-      startPos,
-      endPos
+      from,
+      to,
+      // Start position should not includes edge value.
+      fromPosition: this.getFromPosition(from),
+      toPosition: foundToPosition
+    }
+  }
+
+  findOverScanIndex (fromPosition, toPosition, overScanCount = 0) {
+    const visibleIndex = this.findVisibleIndex(fromPosition, toPosition)
+
+    const from = (visibleIndex.from - overScanCount) >= 0 ? visibleIndex.from - overScanCount : 0
+    const to = (visibleIndex.to + overScanCount) <= this.heights.length - 1 ? visibleIndex.to + overScanCount : this.heights.length - 1
+
+    return {
+      from,
+      to,
+      // Start position should not includes edge value.
+      fromPosition: this.getFromPosition(from),
+      toPosition: this.getFromOfRows()[to]
     }
   }
 }
