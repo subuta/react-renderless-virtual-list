@@ -6,6 +6,7 @@
   "scripts": {
     "serve": "poi docs-src/index.js",
     "build:docs": "poi build docs-src/index.js --out-dir docs --public-path /react-renderless-virtual-list/",
+    "build-dev:docs": "poi build docs-src/index.js --out-dir docs",
     "serve:docs": "cd docs && serve",
     "deploy:docs": "npm run build:docs && gh-pages -d docs",
     "build": "rollup -c",
