@@ -244,7 +244,6 @@ const enhance = compose(
 
         // Call onScroll.
         if (onScroll && hasInitialized) {
-          console.log('scrollTop', scrollTop)
           onScroll({
             scrollTop,
             direction,
