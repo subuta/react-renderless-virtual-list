@@ -116,6 +116,10 @@ const enhance = compose(
           nextGroupHeader = groupBy({ rows, row, index, lastGroupHeader })
         }
 
+        // Keep ref to relatedRow before modify indexes.
+        row.previous = rows[index - 1] || null
+        row.next = rows[index + 1] || null
+
         nextRows.push(row)
 
         if (nextGroupHeader !== lastGroupHeader) {
@@ -180,17 +184,22 @@ const enhance = compose(
   withScroll,
   withHandlers((props) => {
     let debouncedHeightCache = []
-
-    const mergeHeightCache = _.debounce((heightCache) => {
-      props.mergeHeightCache(heightCache)
-      // Clear debouncedHeightCache
-      debouncedHeightCache = []
-    }, 0)
+    let isTicking = false
 
     return {
       setHeightCache: () => (index, height) => {
         debouncedHeightCache[index] = height
-        mergeHeightCache(debouncedHeightCache)
+
+        if (!isTicking) {
+          requestAnimationFrame(() => {
+            props.mergeHeightCache(debouncedHeightCache)
+            isTicking = false
+            // Clear debouncedHeightCache
+            debouncedHeightCache = []
+          })
+        }
+
+        isTicking = true
       }
     }
   }),
@@ -235,6 +244,7 @@ const enhance = compose(
 
         // Call onScroll.
         if (onScroll && hasInitialized) {
+          console.log('scrollTop', scrollTop)
           onScroll({
             scrollTop,
             direction,
