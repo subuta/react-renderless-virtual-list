@@ -86,7 +86,7 @@ test('should render with 1 rows.', () => {
 
   const props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1 })
+  expect(props.row).toEqual({ id: 1, previous: null, next: null })
   expect(props.index).toEqual(0)
   expect(props.setSizeRef).toBeInstanceOf(Function)
 
@@ -116,7 +116,7 @@ test('should render with height as px', () => {
 
   const props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1 })
+  expect(props.row).toEqual({ id: 1, previous: null, next: null })
   expect(props.index).toEqual(0)
   expect(props.setSizeRef).toBeInstanceOf(Function)
 
@@ -247,7 +247,7 @@ test('should render child as pure.', () => {
 
   const props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1 })
+  expect(props.row).toEqual({ id: 1, previous: null, next: null })
   expect(props.index).toEqual(0)
   expect(props.setSizeRef).toBeInstanceOf(Function)
 
@@ -327,7 +327,7 @@ test('should render with 30 rows.', () => {
 
   const childProps = child.firstCall.args[0]
 
-  expect(childProps.row).toEqual({ id: 1 })
+  expect(childProps.row.id).toEqual(1)
   expect(childProps.index).toEqual(0)
   expect(childProps.setSizeRef).toBeInstanceOf(Function)
   expect(childProps.style).toEqual({
@@ -339,7 +339,7 @@ test('should render with 30 rows.', () => {
 
   const lastCallChildProps = child.lastCall.args[0]
 
-  expect(lastCallChildProps.row).toEqual({ id: 6 })
+  expect(lastCallChildProps.row.id).toEqual(6)
   expect(lastCallChildProps.index).toEqual(5)
   expect(lastCallChildProps.setSizeRef).toBeInstanceOf(Function)
   expect(lastCallChildProps.style).toEqual({
@@ -416,7 +416,7 @@ test('should render with reversed 30 rows.', () => {
 
   const childProps = child.firstCall.args[0]
 
-  expect(childProps.row).toEqual({ id: 1 })
+  expect(childProps.row.id).toEqual(1)
   expect(childProps.index).toEqual(0)
   expect(childProps.setSizeRef).toBeInstanceOf(Function)
   expect(childProps.style).toEqual({
@@ -428,7 +428,7 @@ test('should render with reversed 30 rows.', () => {
 
   const lastCallChildProps = child.lastCall.args[0]
 
-  expect(lastCallChildProps.row).toEqual({ id: 30 })
+  expect(lastCallChildProps.row.id).toEqual(30)
   expect(lastCallChildProps.index).toEqual(29)
   expect(lastCallChildProps.setSizeRef).toBeInstanceOf(Function)
   expect(lastCallChildProps.style).toEqual({
