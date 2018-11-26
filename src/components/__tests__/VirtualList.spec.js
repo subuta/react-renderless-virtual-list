@@ -86,7 +86,7 @@ test('should render with 1 rows.', () => {
 
   const props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1, previous: null, next: null })
+  expect(props.row).toEqual({ id: 1, previous: null, index: 0, next: null })
   expect(props.index).toEqual(0)
   expect(props.setSizeRef).toBeInstanceOf(Function)
 
@@ -116,7 +116,7 @@ test('should render with height as px', () => {
 
   const props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1, previous: null, next: null })
+  expect(props.row).toEqual({ id: 1, previous: null, index: 0, next: null })
   expect(props.index).toEqual(0)
   expect(props.setSizeRef).toBeInstanceOf(Function)
 
@@ -247,7 +247,7 @@ test('should render child as pure.', () => {
 
   const props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1, previous: null, next: null })
+  expect(props.row).toEqual({ id: 1, previous: null, index: 0, next: null })
   expect(props.index).toEqual(0)
   expect(props.setSizeRef).toBeInstanceOf(Function)
 

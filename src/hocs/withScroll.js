@@ -74,15 +74,15 @@ export default compose(
       listen: () => listen
     }
   }),
-  withPropsOnChange(
-    ['scrollReason'],
-    (props) => {
-      if (props.scrollReason === SCROLL_REASON_REQUESTED) {
-        props.scrollTo(props.scrollTop)
-      }
-    }
-  ),
   lifecycle({
+    componentDidUpdate () {
+      const { scrollReason, scrollTo, scrollTop } = this.props
+
+      if (scrollReason === SCROLL_REASON_REQUESTED) {
+        scrollTo(scrollTop)
+      }
+    },
+
     componentDidMount () {
       this.unlisten = this.props.listen()
     },

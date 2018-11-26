@@ -65,13 +65,16 @@ const enhance = compose(
   hot(module),
   withStateHandlers(
     () => ({
-      rows: _.times(ROWS_COUNT, createFakeRow)
+      rows: _.times(ROWS_COUNT, createFakeRow),
+      scrollToIndex: null
     }),
     {
       loadRows: ({ rows }) => () => {
         const nextRows = [...rows, ..._.map(_.range(rows.length, rows.length + ROWS_COUNT), createFakeRow)]
         return { rows: nextRows }
-      }
+      },
+
+      setScrollToIndex: () => (scrollToIndex) => ({ scrollToIndex })
     }
   ),
   withPropsOnChange(
@@ -85,10 +88,45 @@ const enhance = compose(
   })
 )
 
-export default enhance(({ rows, onScroll, onLoadMore }) => {
+export default enhance((props) => {
+  const {
+    rows,
+    onScroll,
+    onLoadMore,
+    setScrollToIndex,
+    scrollToIndex
+  } = props
+
+  let draftScrollToIndex = null
+
   return (
     <div className='flex flex-col h-screen'>
-      <header className='p-4 flex-0 border-b-2'>Fixed header area</header>
+      <header className='p-4 flex-0 border-b-2 flex items-center justify-between'>
+        <span>Fixed header area</span>
+
+        <span className='flex items-stretch justify-center'>
+          <input
+            className="w-16 border px-4 py-2 rounded outline-none"
+            type="text"
+            placeholder="No"
+            onChange={(e) => {
+              draftScrollToIndex = e.target.value
+            }}
+            onKeyDown={(e) => {
+              if (_.toLower(e.key) === 'enter') {
+                setScrollToIndex(Number(draftScrollToIndex) - 1)
+              }
+            }}
+          />
+
+          <button
+            className="ml-2 px-2 rounded border"
+            onClick={() => setScrollToIndex(Number(draftScrollToIndex) - 1)}
+          >
+            Go
+          </button>
+        </span>
+      </header>
 
       <Sized>
         {({ size, setSizeRef }) => {
@@ -109,6 +147,7 @@ export default enhance(({ rows, onScroll, onLoadMore }) => {
                   return header
                 }}
                 renderGroupHeader={renderGroupHeader}
+                scrollToIndex={scrollToIndex}
                 reversed
               >
                 {renderRow}

@@ -118,6 +118,7 @@ const enhance = compose(
 
         // Keep ref to relatedRow before modify indexes.
         row.previous = rows[index - 1] || null
+        row.index = index
         row.next = rows[index + 1] || null
 
         nextRows.push(row)
@@ -294,10 +295,36 @@ const enhance = compose(
         }
       },
 
-      adjustScrollTop: ({ requestScrollTo }) => (totalHeight = 0) => {
-        requestScrollTo(VIRTUAL_LIST_HEIGHT - totalHeight)
+      adjustScrollTop: ({ requestScrollTo, height }) => (totalHeight = 0) => {
+        requestScrollTo((VIRTUAL_LIST_HEIGHT - height) - totalHeight)
         isAdjusted = true
+      },
+
+      scrollToRow: (props) => (scrollToIndex) => {
+        const {
+          rows,
+          requestScrollTo,
+          height ,
+          virtualListState
+        } = props
+
+        const rowIndex = _.findIndex(rows, (row) => row.index === Number(scrollToIndex))
+        const fromOfRows = virtualListState.getFromPosition(rowIndex)
+
+        // Ignore unknown index.
+        if (_.isNaN(fromOfRows)) return
+
+        requestScrollTo((VIRTUAL_LIST_HEIGHT - height) - fromOfRows)
       }
+    }
+  }),
+  withHandlers({
+    ensureScrollToRow: ({ scrollToRow }) => (scrollToIndex) => {
+      scrollToRow(scrollToIndex)
+      // FIXME: More smart way to handle scroll gap(of new index).
+      _.delay(() => {
+        scrollToRow(scrollToIndex)
+      }, 300)
     }
   }),
   withPropsOnChange(
@@ -335,10 +362,21 @@ const enhance = compose(
     },
 
     componentDidUpdate (prevProps, prevState, totalHeight) {
-      if (!this.props.reversed) return
+      const {
+        reversed,
+        scrollToIndex,
+        adjustScrollTop,
+        ensureScrollToRow
+      } = this.props
+
+      if (!reversed) return
 
       if (totalHeight !== null) {
-        this.props.adjustScrollTop(totalHeight)
+        adjustScrollTop(totalHeight)
+      }
+
+      if (prevProps.scrollToIndex !== scrollToIndex) {
+        ensureScrollToRow(scrollToIndex)
       }
     }
   }),
