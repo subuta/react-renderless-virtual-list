@@ -283,7 +283,6 @@ test('should render with 30 rows.', () => {
   const count = 30
   const rows = _.times(count, (n) => ({ id: n + 1 }))
   const defaultRowHeight = 100
-  const totalHeight = defaultRowHeight * count
 
   const tree = create(
     <VirtualList
@@ -407,12 +406,12 @@ test('should render with reversed 30 rows.', () => {
   })
 
   // Should render only-visible child rows.
-  expect(child.callCount).toBe(30)
+  expect(child.callCount).toBe(6)
 
   clock.runAll()
 
   // Should not-render after setDebouncedHeightCache.
-  expect(child.callCount).toBe(30)
+  expect(child.callCount).toBe(6)
 
   const childProps = child.firstCall.args[0]
 
@@ -428,12 +427,12 @@ test('should render with reversed 30 rows.', () => {
 
   const lastCallChildProps = child.lastCall.args[0]
 
-  expect(lastCallChildProps.row.id).toEqual(30)
-  expect(lastCallChildProps.index).toEqual(29)
+  expect(lastCallChildProps.row.id).toEqual(6)
+  expect(lastCallChildProps.index).toEqual(5)
   expect(lastCallChildProps.setSizeRef).toBeInstanceOf(Function)
   expect(lastCallChildProps.style).toEqual({
     position: 'absolute',
-    bottom: 2900,
+    bottom: 500,
     left: 0,
     minHeight: 100
   })

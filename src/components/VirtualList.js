@@ -15,6 +15,7 @@ import {
 } from 'recompose'
 
 import withScroll from 'src/hocs/withScroll'
+import performance from 'src/utils/performance'
 import VirtualListState from 'src/utils/virtualListState'
 
 import VirtualListItem from './VirtualListItem'
@@ -22,7 +23,7 @@ import VirtualListItem from './VirtualListItem'
 export const SCROLL_DIRECTION_UP = 'SCROLL_DIRECTION_UP'
 export const SCROLL_DIRECTION_DOWN = 'SCROLL_DIRECTION_DOWN'
 
-const VIRTUAL_LIST_HEIGHT = 10000000;
+const VIRTUAL_LIST_HEIGHT = 10000000
 
 // Default value of props.
 const defaults = {
@@ -145,12 +146,6 @@ const enhance = compose(
       onLoadMore: _.debounce(onLoadMore || _.noop, 300, { leading: true, trailing: false })
     })
   ),
-  withPropsOnChange(
-    ['renderListItem'],
-    ({ renderListItem }) => ({
-      renderListItem: _.memoize(renderListItem, ({ index, fromOfRows, size }) => `row-${index}-${fromOfRows}${size.height ? `-${size.height}` : ''}`)
-    })
-  ),
   withProps(({ height }) => {
     if (height === 0) return { height: defaults.height }
 
@@ -229,9 +224,12 @@ const enhance = compose(
 
         // Start position of rows.
         let fromOfRows = reversed ? (VIRTUAL_LIST_HEIGHT - (scrollTop + height)) : scrollTop
+        if (reversed && !isAdjusted) {
+          fromOfRows = 0
+        }
 
         // End position of rows.
-        let endOfRows = fromOfRows + height
+        const endOfRows = fromOfRows + height
 
         const visibleIndex = virtualListState.findVisibleIndex(fromOfRows, endOfRows)
         const overScanIndex = virtualListState.findOverScanIndex(fromOfRows, endOfRows, overScanCount)
@@ -304,7 +302,7 @@ const enhance = compose(
         const {
           rows,
           requestScrollTo,
-          height ,
+          height,
           virtualListState
         } = props
 
@@ -417,46 +415,57 @@ export default enhance((props) => {
     overScanIndex.toPosition
   )
 
+  let rendered = []
+
+  const hasNoGroupIndices = _.isEmpty(nearestGroupIndices.all)
+  const range = hasNoGroupIndices ? _.range(overScanIndex.from, overScanIndex.to + 1) : _.range(nearestGroupIndices.first || 0, nearestGroupIndices.last + 1)
+
+  performance.measure.skip('renderRows', () => {
+    rendered = _.map(range, (index) => {
+
+      const row = rows[index]
+      const fromOfRows = virtualListState.getFromPosition(index)
+      const size = sizeCache[index] || { height: 0 }
+
+      if (_.includes(groupIndices, index)) {
+        // Skip extra group headers.
+        if (!_.includes(nearestGroupIndices.all, index)) return null
+
+        const groupHeight = virtualListState.getGroupHeight(index)
+
+        return renderListItem({
+          ...props,
+          row,
+          index,
+          size,
+          fromOfRows,
+          [reversed ? 'bottom' : 'top']: groupHeight.from,
+          groupHeight: groupHeight.height,
+          isGroupHeader: true
+        })
+      }
+
+      // No-render if index out of range.
+      if (index < overScanIndex.from || index > overScanIndex.to) return null
+
+      return renderListItem({
+        ...props,
+        row,
+        index,
+        size,
+        fromOfRows,
+        [reversed ? 'bottom' : 'top']: fromOfRows
+      })
+    })
+  }, process.env.NODE_ENV === 'production')
+
   return (
     <Container
       style={containerStyle}
       setScrollContainerRef={setScrollContainerRef}
     >
       <List style={listStyle}>
-        {_.map(rows, (row, index) => {
-          const fromOfRows = virtualListState.getFromPosition(index)
-          const size = sizeCache[index] || { height: 0 }
-
-          if (_.includes(groupIndices, index)) {
-            // Skip extra group headers.
-            if (!_.includes(nearestGroupIndices.all, index)) return null
-
-            const groupHeight = virtualListState.getGroupHeight(index)
-
-            return renderListItem({
-              ...props,
-              row,
-              index,
-              size,
-              fromOfRows,
-              [reversed ? 'bottom' : 'top']: groupHeight.from,
-              groupHeight: groupHeight.height,
-              isGroupHeader: true
-            })
-          }
-
-          // No-render if index out of range.
-          if (index < overScanIndex.from || index > overScanIndex.to) return null
-
-          return renderListItem({
-            ...props,
-            row,
-            index,
-            size,
-            fromOfRows,
-            [reversed ? 'bottom' : 'top']: fromOfRows
-          })
-        })}
+        {rendered}
       </List>
     </Container>
   )
