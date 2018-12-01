@@ -1,5 +1,112 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`should add previous/next index to row with groupHeader. 1`] = `
+<div>
+  <div>
+    <span
+      className="row-1"
+      style={
+        Object {
+          "bottom": 0,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      1
+    </span>
+    <div>
+      0
+    </div>
+    <span
+      className="row-3"
+      style={
+        Object {
+          "bottom": 200,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      2
+    </span>
+    <span
+      className="row-4"
+      style={
+        Object {
+          "bottom": 300,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      3
+    </span>
+    <span
+      className="row-5"
+      style={
+        Object {
+          "bottom": 400,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      4
+    </span>
+    <span
+      className="row-6"
+      style={
+        Object {
+          "bottom": 500,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      5
+    </span>
+    <div>
+      5
+    </div>
+    <span
+      className="row-8"
+      style={
+        Object {
+          "bottom": 700,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      6
+    </span>
+    <span
+      className="row-9"
+      style={
+        Object {
+          "bottom": 800,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      7
+    </span>
+    <div>
+      10
+    </div>
+  </div>
+</div>
+`;
+
 exports[`should render with 1 rows. 1`] = `
 <div
   className="c-virtual-list-container"
@@ -184,6 +291,91 @@ exports[`should render with height as px 1`] = `
 `;
 
 exports[`should render with reversed 30 rows. 1`] = `
+<div>
+  <div>
+    <span
+      className="row-1"
+      style={
+        Object {
+          "bottom": 0,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      1
+    </span>
+    <span
+      className="row-2"
+      style={
+        Object {
+          "bottom": 100,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      2
+    </span>
+    <span
+      className="row-3"
+      style={
+        Object {
+          "bottom": 200,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      3
+    </span>
+    <span
+      className="row-4"
+      style={
+        Object {
+          "bottom": 300,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      4
+    </span>
+    <span
+      className="row-5"
+      style={
+        Object {
+          "bottom": 400,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      5
+    </span>
+    <span
+      className="row-6"
+      style={
+        Object {
+          "bottom": 500,
+          "left": 0,
+          "minHeight": 100,
+          "position": "absolute",
+        }
+      }
+    >
+      6
+    </span>
+  </div>
+</div>
+`;
+
+exports[`should render with reversed 30 rows. 2`] = `
 <div>
   <div>
     <span

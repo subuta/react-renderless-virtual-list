@@ -23,6 +23,7 @@ import VirtualListItem from './VirtualListItem'
 export const SCROLL_DIRECTION_UP = 'SCROLL_DIRECTION_UP'
 export const SCROLL_DIRECTION_DOWN = 'SCROLL_DIRECTION_DOWN'
 
+export const NAMESPACE = '__RRVL__'
 const VIRTUAL_LIST_HEIGHT = 10000000
 
 // Default value of props.
@@ -59,6 +60,7 @@ const defaults = {
       size,
       onMeasure,
       reversed,
+      rows,
       row,
       index,
       groupHeader,
@@ -72,6 +74,7 @@ const defaults = {
     return (
       <VirtualListItem
         key={index}
+        rows={rows}
         row={row}
         index={index}
         groupHeader={groupHeader}
@@ -111,24 +114,36 @@ const enhance = compose(
       let nextRows = []
       let lastGroupHeader = null
 
+      let lastRow = null
+
       _.each(rows, (row, index) => {
         let nextGroupHeader = null
         if (groupBy) {
           nextGroupHeader = groupBy({ rows, row, index, lastGroupHeader })
         }
 
-        // Keep ref to relatedRow before modify indexes.
-        row.previous = rows[index - 1] || null
-        row.index = index
-        row.next = rows[index + 1] || null
+        // Set index
+        const lastRowIndex = _.get(lastRow, [NAMESPACE, 'index'], -1)
+        _.set(row, [NAMESPACE, 'index'], lastRowIndex + 1)
+
+        // Set index to previousRow.
+        const previousRow = rows[index - 1]
+        if (previousRow) {
+          const previousIndex = _.get(previousRow, [NAMESPACE, 'index'])
+
+          _.set(previousRow, [NAMESPACE, 'nextIndex'], lastRowIndex + 1)
+          _.set(row, [NAMESPACE, 'previousIndex'], previousIndex)
+        }
 
         nextRows.push(row)
 
         if (nextGroupHeader !== lastGroupHeader) {
           // Keep current indices.
           groupIndices.push(nextRows.length)
-          nextRows.push({ groupHeader: nextGroupHeader })
+          nextRows.push({ groupHeader: nextGroupHeader, [NAMESPACE]: { index: lastRowIndex + 2 } })
         }
+
+        lastRow = _.last(nextRows)
 
         lastGroupHeader = nextGroupHeader
       })

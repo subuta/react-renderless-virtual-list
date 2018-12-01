@@ -5,7 +5,9 @@ import { create } from 'react-test-renderer'
 
 import _ from 'lodash'
 
-import VirtualList from 'src/components/VirtualList'
+import VirtualList, {
+  NAMESPACE
+} from 'src/components/VirtualList'
 
 let clock
 
@@ -86,7 +88,7 @@ test('should render with 1 rows.', () => {
 
   const props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1, previous: null, index: 0, next: null })
+  expect(props.row).toEqual({ id: 1, __RRVL__: { index: 0, previousIndex: undefined } })
   expect(props.index).toEqual(0)
   expect(props.setSizeRef).toBeInstanceOf(Function)
 
@@ -116,7 +118,7 @@ test('should render with height as px', () => {
 
   const props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1, previous: null, index: 0, next: null })
+  expect(props.row).toEqual({ id: 1, __RRVL__: { index: 0, previousIndex: undefined } })
   expect(props.index).toEqual(0)
   expect(props.setSizeRef).toBeInstanceOf(Function)
 
@@ -247,7 +249,7 @@ test('should render child as pure.', () => {
 
   const props = child.firstCall.args[0]
 
-  expect(props.row).toEqual({ id: 1, previous: null, index: 0, next: null })
+  expect(props.row).toEqual({ id: 1, __RRVL__: { index: 0, previousIndex: undefined } })
   expect(props.index).toEqual(0)
   expect(props.setSizeRef).toBeInstanceOf(Function)
 
@@ -382,7 +384,7 @@ test('should render with reversed 30 rows.', () => {
     </VirtualList>
   )
 
-  expect(mockedRequestScrollTo).toHaveBeenCalled();
+  expect(mockedRequestScrollTo).toHaveBeenCalled()
 
   expect(renderListContainer.callCount).toBe(1)
 
@@ -436,6 +438,99 @@ test('should render with reversed 30 rows.', () => {
     left: 0,
     minHeight: 100
   })
+
+  // Testing for snapshot.
+  expect(tree.toJSON()).toMatchSnapshot()
+})
+
+test('should add previous/next index to row with groupHeader.', () => {
+  const renderGroupHeader = sinon.spy(({ row: { groupHeader } }) => <div>{groupHeader}</div>)
+  const renderListContainer = sinon.spy(({ children }) => <div>{children}</div>)
+  const renderList = sinon.spy(({ children }) => <div>{children}</div>)
+
+  const child = sinon.spy(({ row, index, style }) => {
+    return (
+      <span className={`row-${index + 1}`} style={style}>{row.id}</span>
+    )
+  })
+
+  const count = 30
+  const rows = _.times(count, (n) => ({ id: n + 1 }))
+  const groupBy = ({ row }) => Math.floor(row.id / 5) * 5
+  const defaultRowHeight = 100
+  const totalHeight = defaultRowHeight * count
+
+  const tree = create(
+    <VirtualList
+      height={600}
+      renderListContainer={renderListContainer}
+      renderList={renderList}
+      renderGroupHeader={renderGroupHeader}
+      groupBy={groupBy}
+      rows={rows}
+      defaultRowHeight={defaultRowHeight}
+      reversed
+    >
+      {child}
+    </VirtualList>
+  )
+
+  expect(mockedRequestScrollTo).toHaveBeenCalled()
+
+  expect(renderListContainer.callCount).toBe(1)
+
+  const listContainerProps = renderListContainer.firstCall.args[0]
+  expect(listContainerProps.style).toEqual({
+    height: 600,
+    width: '100vw',
+    overflowX: 'auto',
+    willChange: 'transform'
+  })
+
+  // Should render list.
+  expect(renderList.callCount).toBe(1)
+
+  const listProps = renderList.firstCall.args[0]
+  expect(listProps.style).toEqual({
+    position: 'relative',
+    minHeight: '100%',
+    width: '100%',
+    height: 10000000
+  })
+
+  // Should render only-visible child rows.
+  expect(child.callCount).toBe(7)
+
+  const firstRow = _.get(child.getCall(0), ['args', 0])
+  const secondRow = _.get(child.getCall(1), ['args', 0])
+  const thirdRow = _.get(child.getCall(2), ['args', 0])
+  const fifthRow = _.get(child.getCall(4), ['args', 0])
+  const sixthRow = _.get(child.getCall(5), ['args', 0])
+  const seventhRow = _.get(child.getCall(6), ['args', 0])
+
+  expect(firstRow['row'][NAMESPACE]['previousIndex']).toBe(undefined)
+  expect(firstRow['index']).toBe(0)
+  expect(firstRow['row'][NAMESPACE]['nextIndex']).toBe(2)
+
+  expect(secondRow['row'][NAMESPACE]['previousIndex']).toBe(0)
+  expect(secondRow['index']).toBe(2)
+  expect(secondRow['row'][NAMESPACE]['nextIndex']).toBe(3)
+
+  expect(thirdRow['row'][NAMESPACE]['previousIndex']).toBe(2)
+  expect(thirdRow['index']).toBe(3)
+  expect(thirdRow['row'][NAMESPACE]['nextIndex']).toBe(4)
+
+  expect(fifthRow['row'][NAMESPACE]['previousIndex']).toBe(4)
+  expect(fifthRow['index']).toBe(5)
+  expect(fifthRow['row'][NAMESPACE]['nextIndex']).toBe(7)
+
+  expect(sixthRow['row'][NAMESPACE]['previousIndex']).toBe(5)
+  expect(sixthRow['index']).toBe(7)
+  expect(sixthRow['row'][NAMESPACE]['nextIndex']).toBe(8)
+
+  expect(seventhRow['row'][NAMESPACE]['previousIndex']).toBe(7)
+  expect(seventhRow['index']).toBe(8)
+  expect(seventhRow['row'][NAMESPACE]['nextIndex']).toBe(9)
 
   // Testing for snapshot.
   expect(tree.toJSON()).toMatchSnapshot()
