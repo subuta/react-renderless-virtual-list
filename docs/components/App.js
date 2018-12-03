@@ -74,6 +74,11 @@ const enhance = compose(
         return { rows: nextRows }
       },
 
+      prependRow: ({ rows }) => () => {
+        const nextRows = [createFakeRow(0), ...rows]
+        return { rows: nextRows, scrollToIndex: 0 }
+      },
+
       setScrollToIndex: () => (scrollToIndex) => ({ scrollToIndex })
     }
   ),
@@ -84,6 +89,11 @@ const enhance = compose(
   withHandlers({
     onLoadMore: ({ loadRows }) => () => {
       loadRows()
+    },
+
+    onPrepend: ({ prependRow, setScrollToIndex }) => () => {
+      prependRow()
+      requestAnimationFrame(() => setScrollToIndex(null))
     }
   })
 )
@@ -93,9 +103,12 @@ export default enhance((props) => {
     rows,
     onScroll,
     onLoadMore,
+    onPrepend,
     setScrollToIndex,
     scrollToIndex
   } = props
+
+  window.onPrepend = onPrepend
 
   let draftScrollToIndex = null
 
