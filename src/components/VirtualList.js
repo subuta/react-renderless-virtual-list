@@ -71,10 +71,16 @@ const defaults = {
       bottom
     } = props
 
+    const namespace = row[NAMESPACE]
+    const nextRow = rows[namespace.nextIndex] || null
+    const previousRow = rows[namespace.previousIndex] || null
+
     return (
       <VirtualListItem
         key={index}
         rows={rows}
+        nextRow={nextRow}
+        previousRow={previousRow}
         row={row}
         index={index}
         groupHeader={groupHeader}
@@ -117,13 +123,9 @@ const enhance = compose(
       let lastRow = null
 
       _.each(rows, (row, index) => {
-        let nextGroupHeader = null
-        if (groupBy) {
-          nextGroupHeader = groupBy({ rows, row, index, lastGroupHeader })
-        }
-
         // Set index
         const lastRowIndex = _.get(lastRow, [NAMESPACE, 'index'], -1)
+        const currentRowIndex = lastRowIndex + 1
         _.set(row, [NAMESPACE, 'index'], lastRowIndex + 1)
 
         // Set index to previousRow.
@@ -131,16 +133,21 @@ const enhance = compose(
         if (previousRow) {
           const previousIndex = _.get(previousRow, [NAMESPACE, 'index'])
 
-          _.set(previousRow, [NAMESPACE, 'nextIndex'], lastRowIndex + 1)
+          _.set(previousRow, [NAMESPACE, 'nextIndex'], currentRowIndex)
           _.set(row, [NAMESPACE, 'previousIndex'], previousIndex)
         }
 
         nextRows.push(row)
 
+        let nextGroupHeader = null
+        if (groupBy) {
+          nextGroupHeader = groupBy({ rows, row, index, previousRow, lastGroupHeader })
+        }
+
         if (nextGroupHeader !== lastGroupHeader) {
           // Keep current indices.
           groupIndices.push(nextRows.length)
-          nextRows.push({ groupHeader: nextGroupHeader, [NAMESPACE]: { index: lastRowIndex + 2 } })
+          nextRows.push({ groupHeader: nextGroupHeader, [NAMESPACE]: { index: currentRowIndex + 1 } })
         }
 
         lastRow = _.last(nextRows)

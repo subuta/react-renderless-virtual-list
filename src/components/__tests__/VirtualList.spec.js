@@ -456,7 +456,7 @@ test('should add previous/next index to row with groupHeader.', () => {
 
   const count = 30
   const rows = _.times(count, (n) => ({ id: n + 1 }))
-  const groupBy = ({ row }) => Math.floor(row.id / 5) * 5
+  const groupBy = sinon.spy(({ row }) => Math.floor(row.id / 5) * 5)
   const defaultRowHeight = 100
   const totalHeight = defaultRowHeight * count
 
@@ -477,6 +477,7 @@ test('should add previous/next index to row with groupHeader.', () => {
 
   expect(mockedRequestScrollTo).toHaveBeenCalled()
 
+  expect(groupBy.callCount).toBe(30)
   expect(renderListContainer.callCount).toBe(1)
 
   const listContainerProps = renderListContainer.firstCall.args[0]
@@ -501,6 +502,7 @@ test('should add previous/next index to row with groupHeader.', () => {
   // Should render only-visible child rows.
   expect(child.callCount).toBe(7)
 
+  // Should renderListItem has correct args
   const firstRow = _.get(child.getCall(0), ['args', 0])
   const secondRow = _.get(child.getCall(1), ['args', 0])
   const thirdRow = _.get(child.getCall(2), ['args', 0])
@@ -509,28 +511,44 @@ test('should add previous/next index to row with groupHeader.', () => {
   const seventhRow = _.get(child.getCall(6), ['args', 0])
 
   expect(firstRow['row'][NAMESPACE]['previousIndex']).toBe(undefined)
-  expect(firstRow['index']).toBe(0)
+  expect(firstRow['row'][NAMESPACE]['index']).toBe(0)
   expect(firstRow['row'][NAMESPACE]['nextIndex']).toBe(2)
+  expect(firstRow['nextRow']['id']).toBe(2)
 
   expect(secondRow['row'][NAMESPACE]['previousIndex']).toBe(0)
-  expect(secondRow['index']).toBe(2)
+  expect(secondRow['row'][NAMESPACE]['index']).toBe(2)
   expect(secondRow['row'][NAMESPACE]['nextIndex']).toBe(3)
+  expect(secondRow['previousRow']['id']).toBe(1)
+  expect(secondRow['nextRow']['id']).toBe(3)
 
   expect(thirdRow['row'][NAMESPACE]['previousIndex']).toBe(2)
-  expect(thirdRow['index']).toBe(3)
+  expect(thirdRow['row'][NAMESPACE]['index']).toBe(3)
   expect(thirdRow['row'][NAMESPACE]['nextIndex']).toBe(4)
 
   expect(fifthRow['row'][NAMESPACE]['previousIndex']).toBe(4)
-  expect(fifthRow['index']).toBe(5)
+  expect(fifthRow['row'][NAMESPACE]['index']).toBe(5)
   expect(fifthRow['row'][NAMESPACE]['nextIndex']).toBe(7)
 
   expect(sixthRow['row'][NAMESPACE]['previousIndex']).toBe(5)
-  expect(sixthRow['index']).toBe(7)
+  expect(sixthRow['row'][NAMESPACE]['index']).toBe(7)
   expect(sixthRow['row'][NAMESPACE]['nextIndex']).toBe(8)
 
   expect(seventhRow['row'][NAMESPACE]['previousIndex']).toBe(7)
-  expect(seventhRow['index']).toBe(8)
+  expect(seventhRow['row'][NAMESPACE]['index']).toBe(8)
   expect(seventhRow['row'][NAMESPACE]['nextIndex']).toBe(9)
+
+  // Should groupBy has correct args
+  const firstGroupBy = _.get(groupBy.getCall(0), ['args', 0])
+  const secondGroupBy = _.get(groupBy.getCall(1), ['args', 0])
+
+  expect(firstGroupBy['row'][NAMESPACE]['previousIndex']).toBe(undefined)
+  expect(firstGroupBy['row'][NAMESPACE]['index']).toBe(0)
+  expect(firstGroupBy['row'][NAMESPACE]['nextIndex']).toBe(2)
+
+  expect(secondGroupBy['row'][NAMESPACE]['previousIndex']).toBe(0)
+  expect(secondGroupBy['row'][NAMESPACE]['index']).toBe(2)
+  expect(secondGroupBy['row'][NAMESPACE]['nextIndex']).toBe(3)
+  expect(secondGroupBy['previousRow']['id']).toBe(1)
 
   // Testing for snapshot.
   expect(tree.toJSON()).toMatchSnapshot()
