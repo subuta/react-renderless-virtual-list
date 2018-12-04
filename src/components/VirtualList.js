@@ -7,10 +7,8 @@ import {
   withStateHandlers,
   withHandlers,
   withPropsOnChange,
-  withProps,
   defaultProps,
   lifecycle,
-  shouldUpdate,
   pure
 } from 'recompose'
 
@@ -71,7 +69,7 @@ const defaults = {
       bottom
     } = props
 
-    const namespace = row[NAMESPACE]
+    const namespace = row[NAMESPACE] || {}
     const nextRow = rows[namespace.nextIndex] || null
     const previousRow = rows[namespace.previousIndex] || null
 
@@ -120,13 +118,12 @@ const enhance = compose(
       let nextRows = []
       let lastGroupHeader = null
 
-      let lastRow = null
+      let lastIndex = 0
 
       _.each(rows, (row, index) => {
         // Set index
-        const lastRowIndex = _.get(lastRow, [NAMESPACE, 'index'], -1)
-        const currentRowIndex = lastRowIndex + 1
-        _.set(row, [NAMESPACE, 'index'], lastRowIndex + 1)
+        const currentRowIndex = lastIndex
+        _.set(row, [NAMESPACE, 'index'], currentRowIndex)
 
         // Set index to previousRow.
         const previousRow = rows[index - 1]
@@ -147,17 +144,17 @@ const enhance = compose(
         if (nextGroupHeader !== lastGroupHeader) {
           // Keep current indices.
           groupIndices.push(nextRows.length)
-          nextRows.push({ groupHeader: nextGroupHeader, [NAMESPACE]: { index: currentRowIndex + 1 } })
+          nextRows.push({ groupHeader: nextGroupHeader })
         }
 
-        lastRow = _.last(nextRows)
+        lastIndex = nextRows.length
 
         lastGroupHeader = nextGroupHeader
       })
 
       return {
         groupIndices,
-        rows: nextRows
+        rows: nextRows,
       }
     }
   ),
@@ -168,13 +165,16 @@ const enhance = compose(
       onLoadMore: _.debounce(onLoadMore || _.noop, 300, { leading: true, trailing: false })
     })
   ),
-  withProps(({ height }) => {
-    if (height === 0) return { height: defaults.height }
+  withPropsOnChange(
+    ['height'],
+    ({ height }) => {
+      if (height === 0) return { height: defaults.height }
 
-    return {
-      height: _.isNumber(height) ? height : parseFloat(height, 10),
+      return {
+        height: _.isNumber(height) ? height : parseFloat(height, 10),
+      }
     }
-  }),
+  ),
   withStateHandlers(
     ({ reversed, rows, groupIndices }) => {
       const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
@@ -199,39 +199,27 @@ const enhance = compose(
       }
     }
   ),
+  withPropsOnChange(
+    ['rows'],
+    (props) => {
+      const {
+        rows,
+        heightCache,
+        mergeHeightCache
+      } = props
+
+      const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
+      mergeHeightCache(_.merge(fill, heightCache))
+    }
+  ),
   withScroll,
-  withHandlers((props) => {
+  withHandlers(() => {
+    let lastScrollTop = -1
+    let isAdjusted = false
     let debouncedHeightCache = []
     let isTicking = false
 
     return {
-      setHeightCache: () => (index, height) => {
-        debouncedHeightCache[index] = height
-
-        if (!isTicking) {
-          requestAnimationFrame(() => {
-            props.mergeHeightCache(debouncedHeightCache)
-            isTicking = false
-            // Clear debouncedHeightCache
-            debouncedHeightCache = []
-          })
-        }
-
-        isTicking = true
-      }
-    }
-  }),
-  withHandlers(() => {
-    let lastScrollTop = -1
-    let isAdjusted = false
-    let sizeCache = []
-
-    return {
-      onMeasure: ({ setHeightCache }) => (index, size) => {
-        sizeCache[index] = size
-        setHeightCache(index, size.height)
-      },
-
       handleScroll: (props) => () => {
         const {
           scrollTop = 0,
@@ -292,7 +280,20 @@ const enhance = compose(
         }
       },
 
-      getSizeCache: () => () => sizeCache,
+      setHeightCache: (props) => (index, height) => {
+        debouncedHeightCache[index] = height
+
+        if (!isTicking) {
+          requestAnimationFrame(() => {
+            props.mergeHeightCache(debouncedHeightCache)
+            isTicking = false
+            // Clear debouncedHeightCache
+            debouncedHeightCache = []
+          })
+        }
+
+        isTicking = true
+      },
 
       getStyles: ({ totalHeight, heightCache, height }) => () => {
         const containerStyle = {
@@ -328,7 +329,7 @@ const enhance = compose(
           virtualListState
         } = props
 
-        const rowIndex = _.findIndex(rows, (row) => row.index === Number(scrollToIndex))
+        const rowIndex = _.findIndex(rows, (row) => _.get(row, [NAMESPACE, 'index']) === Number(scrollToIndex))
         const fromOfRows = virtualListState.getFromPosition(rowIndex)
 
         // Ignore unknown index.
@@ -339,6 +340,10 @@ const enhance = compose(
     }
   }),
   withHandlers({
+    onMeasure: ({ setHeightCache }) => (index, size) => {
+      setHeightCache(index, size.height)
+    },
+
     ensureScrollToRow: ({ scrollToRow }) => (scrollToIndex) => {
       scrollToRow(scrollToIndex)
       // FIXME: More smart way to handle scroll gap(of new index).
@@ -348,24 +353,11 @@ const enhance = compose(
     }
   }),
   withPropsOnChange(
-    ['scrollTop', 'height'],
+    ['virtualListState', 'scrollTop', 'height'],
     (props) => ({
       ...props.handleScroll(),
       ...props.getStyles()
     })
-  ),
-  withPropsOnChange(
-    ['rows'],
-    (props) => {
-      const {
-        rows,
-        heightCache,
-        mergeHeightCache
-      } = props
-
-      const fill = _.fill(new Array(rows.length), defaults.rowSize.height)
-      mergeHeightCache(_.merge(fill, heightCache))
-    }
   ),
   lifecycle({
     componentDidMount () {
@@ -399,13 +391,6 @@ const enhance = compose(
         ensureScrollToRow(scrollToIndex)
       }
     }
-  }),
-  shouldUpdate((props, nextProps) => {
-    const isOverScanIndexChanged = !_.isEqual(props.overScanIndex, nextProps.overScanIndex)
-    const isHeightChanged = !_.isEqual(props.height, nextProps.height)
-    const isTotalHeightChanged = !_.isEqual(props.totalHeight, nextProps.totalHeight)
-
-    return isOverScanIndexChanged || isHeightChanged || isTotalHeightChanged
   })
 )
 
@@ -424,14 +409,12 @@ export default enhance((props) => {
     setScrollContainerRef,
     renderListItem,
     renderListContainer,
-    getSizeCache,
     reversed,
     virtualListState
   } = props
 
   const List = renderList
   const Container = renderListContainer
-  const sizeCache = getSizeCache()
   const nearestGroupIndices = virtualListState.nearestGroupIndices(
     overScanIndex.fromPosition,
     overScanIndex.toPosition
@@ -447,7 +430,6 @@ export default enhance((props) => {
 
       const row = rows[index]
       const fromOfRows = virtualListState.getFromPosition(index)
-      const size = sizeCache[index] || { height: 0 }
 
       if (_.includes(groupIndices, index)) {
         // Skip extra group headers.
@@ -459,7 +441,6 @@ export default enhance((props) => {
           ...props,
           row,
           index,
-          size,
           fromOfRows,
           [reversed ? 'bottom' : 'top']: groupHeight.from,
           groupHeight: groupHeight.height,
@@ -474,7 +455,6 @@ export default enhance((props) => {
         ...props,
         row,
         index,
-        size,
         fromOfRows,
         [reversed ? 'bottom' : 'top']: fromOfRows
       })

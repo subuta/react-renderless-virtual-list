@@ -107,6 +107,10 @@ exports[`should add previous/next index to row with groupHeader. 1`] = `
 </div>
 `;
 
+exports[`should re-render with append row. 1`] = `"<div class=\\"c-virtual-list-container\\" style=\\"height: 500px; width: 100vw; overflow-x: auto;\\"><div><span class=\\"row-1\\" style=\\"position: absolute; top: 0px; left: 0px; min-height: 100px;\\">1</span><span class=\\"row-2\\" style=\\"position: absolute; top: 100px; left: 0px; min-height: 100px;\\">2</span><span class=\\"row-3\\" style=\\"position: absolute; top: 200px; left: 0px; min-height: 100px;\\">3</span><span class=\\"row-4\\" style=\\"position: absolute; top: 300px; left: 0px; min-height: 100px;\\">999</span></div></div>"`;
+
+exports[`should re-render with unshift row. 1`] = `"<div class=\\"c-virtual-list-container\\" style=\\"height: 500px; width: 100vw; overflow-x: auto;\\"><div><span class=\\"row-1\\" style=\\"position: absolute; top: 0px; left: 0px; min-height: 100px;\\">999</span><span class=\\"row-2\\" style=\\"position: absolute; top: 100px; left: 0px; min-height: 100px;\\">1</span><span class=\\"row-3\\" style=\\"position: absolute; top: 200px; left: 0px; min-height: 100px;\\">2</span><span class=\\"row-4\\" style=\\"position: absolute; top: 300px; left: 0px; min-height: 100px;\\">3</span></div></div>"`;
+
 exports[`should render with 1 rows. 1`] = `
 <div
   className="c-virtual-list-container"

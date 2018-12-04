@@ -2,6 +2,7 @@ import React from 'react'
 import { mount } from 'enzyme'
 import sinon from 'sinon'
 import { create } from 'react-test-renderer'
+import toJson from 'enzyme-to-json';
 
 import _ from 'lodash'
 
@@ -267,8 +268,8 @@ test('should render child as pure.', () => {
     scrollTop: 100
   })
 
-  expect(renderListContainer.callCount).toBe(1)
-  expect(renderList.callCount).toBe(1)
+  expect(renderListContainer.callCount).toBe(2)
+  expect(renderList.callCount).toBe(2)
   expect(child.callCount).toBe(1)
 })
 
@@ -552,4 +553,81 @@ test('should add previous/next index to row with groupHeader.', () => {
 
   // Testing for snapshot.
   expect(tree.toJSON()).toMatchSnapshot()
+})
+
+test('should re-render with unshift row.', () => {
+  const renderList = sinon.spy(({ children }) => <div>{children}</div>)
+  const child = sinon.spy(({ row, index, style }) => {
+    return (
+      <span className={`row-${index + 1}`} style={style}>{row.id}</span>
+    )
+  })
+
+  const rows = _.times(3, (n) => ({ id: n + 1 }))
+
+  let wrapper = mount(
+    <VirtualList
+      renderList={renderList}
+      height={500}
+      rows={rows}
+    >
+      {child}
+    </VirtualList>
+  )
+
+  expect(child.callCount).toBe(3)
+  expect(renderList.callCount).toBe(1)
+
+  const props = child.firstCall.args[0]
+
+  expect(props.row).toEqual({ id: 1, __RRVL__: { index: 0, nextIndex: 1 } })
+  expect(props.index).toEqual(0)
+  expect(props.setSizeRef).toBeInstanceOf(Function)
+
+  wrapper = wrapper.setProps({
+    rows: [{id: 999}, ...rows]
+  })
+
+  // Testing for snapshot.
+  expect(wrapper.html()).toMatchSnapshot()
+})
+
+test('should re-render with append row.', () => {
+  const renderList = sinon.spy(({ children }) => <div>{children}</div>)
+  const child = sinon.spy(({ row, index, style }) => {
+    return (
+      <span className={`row-${index + 1}`} style={style}>{row.id}</span>
+    )
+  })
+
+  const rows = _.times(3, (n) => ({ id: n + 1 }))
+
+  const wrapper = mount(
+    <VirtualList
+      renderList={renderList}
+      height={500}
+      rows={rows}
+    >
+      {child}
+    </VirtualList>
+  )
+
+  expect(child.callCount).toBe(3)
+  expect(renderList.callCount).toBe(1)
+
+  const props = child.firstCall.args[0]
+
+  expect(props.row).toEqual({ id: 1, __RRVL__: { index: 0, nextIndex: 1 } })
+  expect(props.index).toEqual(0)
+  expect(props.setSizeRef).toBeInstanceOf(Function)
+
+  wrapper.setProps({
+    rows: [...rows, {id: 999}]
+  })
+
+  expect(child.callCount).toBe(4)
+  expect(renderList.callCount).toBe(3)
+
+  // Testing for snapshot.
+  expect(wrapper.html()).toMatchSnapshot()
 })
