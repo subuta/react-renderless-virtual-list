@@ -91,16 +91,25 @@ class VirtualListState {
   findOverScanIndex (fromPosition, toPosition, overScanCount = 0) {
     const visibleIndex = this.findVisibleIndex(fromPosition, toPosition)
 
+    if (visibleIndex.from === undefined || visibleIndex.to === undefined) {
+      return {
+        ...this.lastOverScanIndex,
+        overflow: true
+      }
+    }
+
     const from = (visibleIndex.from - overScanCount) >= 0 ? visibleIndex.from - overScanCount : 0
     const to = (visibleIndex.to + overScanCount) <= this.heights.length - 1 ? visibleIndex.to + overScanCount : this.heights.length - 1
 
-    return {
+    this.lastOverScanIndex = {
       from,
       to,
       // Start position should not includes edge value.
       fromPosition: this.getFromPosition(from),
       toPosition: this.getFromOfRows()[to]
     }
+
+    return this.lastOverScanIndex
   }
 }
 

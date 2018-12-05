@@ -99,6 +99,22 @@ const defaults = {
     )
   },
 
+  renderPlaceholder: (props) => {
+    const {
+      style
+    } = props
+
+    return (
+      <div
+        key='placeholder'
+        className='placeholder'
+        style={style}
+      >
+        <h3>Loading...</h3>
+      </div>
+    )
+  },
+
   keyBy: ({ index }) => index,
 
   overScanCount: 3,
@@ -408,6 +424,7 @@ export default enhance((props) => {
     containerStyle = {},
     listStyle = {},
     groupIndices,
+    visibleIndex,
     // Will be used as height before render row.
     overScanIndex = {
       from: 0,
@@ -417,11 +434,13 @@ export default enhance((props) => {
     setScrollContainerRef,
     renderListItem,
     renderListContainer,
+    renderPlaceholder,
     reversed,
     virtualListState
   } = props
 
   const List = renderList
+  const Placeholder = renderPlaceholder
   const Container = renderListContainer
   const nearestGroupIndices = virtualListState.nearestGroupIndices(
     overScanIndex.fromPosition,
@@ -467,6 +486,23 @@ export default enhance((props) => {
       })
     })
   }, process.env.NODE_ENV === 'production')
+
+  if (overScanIndex.overflow) {
+    const fromOfRows = virtualListState.getFromPosition(overScanIndex.to + 1)
+
+    const style = {
+      position: 'absolute',
+      [reversed ? 'bottom' : 'top']: fromOfRows,
+      left: 0
+    }
+
+    rendered.push(
+      <Placeholder
+        key='placeholder'
+        style={style}
+      />
+    )
+  }
 
   return (
     <Container

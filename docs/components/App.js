@@ -13,8 +13,12 @@ import {
   compose,
   withHandlers,
   withStateHandlers,
-  withPropsOnChange
+  withPropsOnChange,
+  lifecycle
 } from 'recompose'
+
+import Placeholder from './Placeholder'
+import AnimatedPlaceholder from './AnimatedPlaceholder'
 
 const renderRow = ({ row, setSizeRef, style }) => {
   return (
@@ -24,7 +28,7 @@ const renderRow = ({ row, setSizeRef, style }) => {
     >
       <div
         ref={setSizeRef}
-        className='relative px-4 py-2 border-b'
+        className='relative bg-white px-4 py-2 border-b z-10'
       >
         <span className='text-red font-bold'>Row: {row.id}</span>
 
@@ -49,6 +53,36 @@ const renderGroupHeader = ({ row, setSizeRef, style }) => {
         <div className="py-2 px-4 bg-red text-white font-bold">{`${groupHeader}`}</div>
       </div>
     </div>
+  )
+}
+
+const renderPlaceholder = (props) => {
+  const {
+    className = 'placeholder',
+    style
+  } = props
+
+  return (
+    <Placeholder
+      key='placeholder'
+      className={className}
+      style={style}
+    />
+  )
+}
+
+const renderAnimatedPlaceholder = (props) => {
+  const {
+    className = 'placeholder',
+    style
+  } = props
+
+  return (
+    <AnimatedPlaceholder
+      key='placeholder'
+      className={className}
+      style={style}
+    />
   )
 }
 
@@ -89,7 +123,11 @@ const enhance = compose(
   ),
   withHandlers({
     onLoadMore: ({ loadRows }) => () => {
-      loadRows()
+      console.log('Try to load more ....')
+      _.delay(() => {
+        console.log('3 seconds elapsed!')
+        loadRows()
+      }, 3000)
     },
 
     onPrepend: ({ prependRow, setScrollToIndex }) => () => {
@@ -161,8 +199,10 @@ export default enhance((props) => {
 
                   return `${header}th`
                 }}
-                keyBy={({row}) => row.id}
+                keyBy={({ row }) => row.id}
                 renderGroupHeader={renderGroupHeader}
+                // renderPlaceholder={renderAnimatedPlaceholder}
+                renderPlaceholder={renderPlaceholder}
                 scrollToIndex={scrollToIndex}
                 reversed
               >

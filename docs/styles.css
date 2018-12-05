@@ -66,7 +66,11 @@ ul {
 }
 
 .c-sticky {
-  position: static;
-  position: -webkit-sticky;
-  position: sticky;
+  position: static !important;
+  position: -webkit-sticky !important;
+  position: sticky !important;
+}
+
+.z-minus {
+  z-index: -1;
 }

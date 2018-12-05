@@ -6286,9 +6286,9 @@ ul {
 }
 
 .c-sticky {
-  position: static;
-  position: -webkit-sticky;
-  position: sticky;
+  position: static !important;
+  position: -webkit-sticky !important;
+  position: sticky !important;
 }
 
 @media (min-width: 576px) {
