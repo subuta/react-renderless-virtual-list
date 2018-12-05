@@ -36,6 +36,7 @@ const renderRow = ({ row, setSizeRef, style }) => {
 
 const renderGroupHeader = ({ row, setSizeRef, style }) => {
   const { groupHeader } = row
+
   return (
     <div
       className={`header-${groupHeader}`}
@@ -45,7 +46,7 @@ const renderGroupHeader = ({ row, setSizeRef, style }) => {
         ref={setSizeRef}
         className='c-sticky pin-t z-50 w-screen'
       >
-        <div className="py-2 px-4 bg-red text-white font-bold">{groupHeader}th</div>
+        <div className="py-2 px-4 bg-red text-white font-bold">{`${groupHeader}`}</div>
       </div>
     </div>
   )
@@ -75,7 +76,7 @@ const enhance = compose(
       },
 
       prependRow: ({ rows }) => () => {
-        const nextRows = [createFakeRow(0), ...rows]
+        const nextRows = [createFakeRow(10000), ...rows]
         return { rows: nextRows, scrollToIndex: 0 }
       },
 
@@ -152,13 +153,15 @@ export default enhance((props) => {
                 onLoadMore={onLoadMore}
                 onScroll={onScroll}
                 height={size.height}
+                width={size.width}
                 rows={rows}
                 groupBy={({ row }) => {
                   const header = Math.floor(row.id / 25) * 25
                   if (header === 0) return null
 
-                  return header
+                  return `${header}th`
                 }}
+                keyBy={({row}) => row.id}
                 renderGroupHeader={renderGroupHeader}
                 scrollToIndex={scrollToIndex}
                 reversed

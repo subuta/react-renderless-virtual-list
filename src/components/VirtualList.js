@@ -53,6 +53,7 @@ const defaults = {
 
   renderListItem: (props) => {
     const {
+      keyBy,
       // Will be used as height before render row.
       rowSize,
       size,
@@ -61,7 +62,6 @@ const defaults = {
       rows,
       row,
       index,
-      groupHeader,
       isGroupHeader,
       fromOfRows,
       groupHeight,
@@ -73,15 +73,17 @@ const defaults = {
     const nextRow = rows[namespace.nextIndex] || null
     const previousRow = rows[namespace.previousIndex] || null
 
+    // Prepend index for detecting row changes.
+    const key = `${index}-${isGroupHeader ? row.groupHeader : keyBy({ row, index })}`
+
     return (
       <VirtualListItem
-        key={index}
+        key={key}
         rows={rows}
         nextRow={nextRow}
         previousRow={previousRow}
         row={row}
         index={index}
-        groupHeader={groupHeader}
         onMeasure={onMeasure}
         size={size}
         defaultRowSize={rowSize}
@@ -97,9 +99,12 @@ const defaults = {
     )
   },
 
+  keyBy: ({ index }) => index,
+
   overScanCount: 3,
 
   height: 300,
+  width: '100%',
 
   rowSize: {
     height: 100,
@@ -124,6 +129,7 @@ const enhance = compose(
         // Set index
         const currentRowIndex = lastIndex
         _.set(row, [NAMESPACE, 'index'], currentRowIndex)
+        _.set(row, [NAMESPACE, 'initialIndex'], index)
 
         // Set index to previousRow.
         const previousRow = rows[index - 1]
@@ -166,12 +172,14 @@ const enhance = compose(
     })
   ),
   withPropsOnChange(
-    ['height'],
-    ({ height }) => {
+    ['height', 'width'],
+    ({ height, width }) => {
       if (height === 0) return { height: defaults.height }
+      if (width === 0) return { height: defaults.width }
 
       return {
         height: _.isNumber(height) ? height : parseFloat(height, 10),
+        width: _.isNumber(width) ? width : parseFloat(width, 10)
       }
     }
   ),
@@ -295,10 +303,10 @@ const enhance = compose(
         isTicking = true
       },
 
-      getStyles: ({ totalHeight, heightCache, height }) => () => {
+      getStyles: ({ totalHeight, heightCache, height, width }) => () => {
         const containerStyle = {
           height,
-          width: '100vw',
+          width,
           overflowX: 'auto',
           willChange: 'transform'
         }
@@ -329,7 +337,7 @@ const enhance = compose(
           virtualListState
         } = props
 
-        const rowIndex = _.findIndex(rows, (row) => _.get(row, [NAMESPACE, 'index']) === Number(scrollToIndex))
+        const rowIndex = _.findIndex(rows, (row) => _.get(row, [NAMESPACE, 'initialIndex']) === Number(scrollToIndex))
         const fromOfRows = virtualListState.getFromPosition(rowIndex)
 
         // Ignore unknown index.
@@ -427,7 +435,6 @@ export default enhance((props) => {
 
   performance.measure.skip('renderRows', () => {
     rendered = _.map(range, (index) => {
-
       const row = rows[index]
       const fromOfRows = virtualListState.getFromPosition(index)
 
